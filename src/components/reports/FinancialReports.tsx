@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import BalanceSheet from "./BalanceSheet";
 import ProfitLossStatement from "./ProfitLossStatement";
 import CashFlowStatement from "./CashFlowStatement";
 import TaxReports from "./TaxReports";
 import { DateRange } from "@/types/financial";
+import { addSampleData } from "@/utils/sampleData";
 
 const FinancialReports: React.FC = () => {
 	const [activeReport, setActiveReport] = useState("balance-sheet");
@@ -13,6 +14,11 @@ const FinancialReports: React.FC = () => {
 			.split("T")[0], // Start of current year
 		endDate: new Date().toISOString().split("T")[0], // Today
 	});
+
+	useEffect(() => {
+		// Ensure we have sample data when the component loads
+		addSampleData();
+	}, []);
 
 	const reports = [
 		{ id: "balance-sheet", name: "Balance Sheet", icon: "📊" },

@@ -2,6 +2,10 @@ import React, { useState, useEffect } from "react";
 import { collection, getDocs, query, where, orderBy } from "firebase/firestore";
 import db from "@/utils/firestore";
 import { FinancialData, DateRange } from "@/types/financial";
+import {
+	financialCalculationService,
+	FinancialCalculations,
+} from "@/utils/financialCalculations";
 
 interface BalanceSheetProps {
 	dateRange: DateRange;
@@ -21,178 +25,210 @@ const BalanceSheet: React.FC<BalanceSheetProps> = ({ dateRange }) => {
 		try {
 			setLoading(true);
 
-			// Fetch invoices for revenue calculation
-			const invoicesQuery = query(
-				collection(db, "invoices"),
-				where("invoiceDate", ">=", dateRange.startDate),
-				where("invoiceDate", "<=", dateRange.endDate)
+			// Get real financial calculations
+			const financialCalculations =
+				await financialCalculationService.calculateFinancialData(
+					dateRange
+				);
+
+			// Calculate net income for retained earnings
+			const grossProfit =
+				financialCalculations.totalRevenue -
+				financialCalculations.totalCOGS;
+			const operatingIncome =
+				grossProfit - financialCalculations.totalOperatingExpenses;
+			const netIncome = operatingIncome - financialCalculations.incomeTax;
+
+			// Calculate accounts payable from expenses
+			const expensesQuery = query(
+				collection(db, "expenses"),
+				where("date", ">=", dateRange.startDate),
+				where("date", "<=", dateRange.endDate),
+				where("status", "==", "approved")
 			);
-			const invoicesSnapshot = await getDocs(invoicesQuery);
-			const invoices = invoicesSnapshot.docs.map((doc) => ({
+			const expensesSnapshot = await getDocs(expensesQuery);
+			const expenses = expensesSnapshot.docs.map((doc) => ({
 				id: doc.id,
 				...doc.data(),
 			}));
 
-			// Calculate basic financial data from invoices
-			const totalRevenue = invoices.reduce((sum, invoice) => {
-				const price = Number(invoice.price) || 0;
-				const quantity = Number(invoice.quantity) || 0;
-				const taxRate = Number(invoice.taxRate) || 0;
-				const discount = Number(invoice.discount) || 0;
-				const subtotal = price * quantity;
-				const taxAmount = (subtotal * taxRate) / 100;
-				const total = subtotal + taxAmount - discount;
-				return sum + total;
-			}, 0);
+			const accountsPayable =
+				expenses.reduce((sum, expense) => {
+					return sum + (Number(expense.amount) || 0);
+				}, 0) * 0.3; // Assume 30% of expenses are still payable
 
-			// Calculate accounts receivable (unpaid invoices)
-			const accountsReceivable = invoices
-				.filter((invoice) => invoice.paymentStatus !== "Paid")
-				.reduce((sum, invoice) => {
-					const price = Number(invoice.price) || 0;
-					const quantity = Number(invoice.quantity) || 0;
-					const taxRate = Number(invoice.taxRate) || 0;
-					const discount = Number(invoice.discount) || 0;
-					const subtotal = price * quantity;
-					const taxAmount = (subtotal * taxRate) / 100;
-					const total = subtotal + taxAmount - discount;
-					return sum + total;
-				}, 0);
+			// Calculate accrued expenses (simplified)
+			const accruedExpenses =
+				financialCalculations.totalOperatingExpenses * 0.1;
 
-			// Calculate inventory value from products
-			const productsQuery = query(collection(db, "products"));
-			const productsSnapshot = await getDocs(productsQuery);
-			const products = productsSnapshot.docs.map((doc) => ({
-				id: doc.id,
-				...doc.data(),
-			}));
+			// Calculate owner's equity (simplified - in real app, this would track actual equity)
+			const ownerEquity = Math.max(
+				0,
+				financialCalculations.totalRevenue * 0.2
+			);
 
-			const inventoryValue = products.reduce((sum, product) => {
-				const price = Number(product.price) || 0;
-				const stock = Number(product.stock) || 0;
-				return sum + price * stock;
-			}, 0);
-
-			// Mock data for demonstration - in real app, you'd have more data sources
-			const mockFinancialData: FinancialData = {
+			const financialData: FinancialData = {
 				assets: {
 					currentAssets: {
-						cash: 50000, // This would come from bank transactions
-						accountsReceivable: accountsReceivable,
-						inventory: inventoryValue,
-						prepaidExpenses: 5000,
-						otherCurrentAssets: 2000,
+						cash: financialCalculations.cash,
+						accountsReceivable:
+							financialCalculations.accountsReceivable,
+						inventory: financialCalculations.closingInventory,
+						prepaidExpenses:
+							financialCalculations.totalOperatingExpenses * 0.05, // 5% of expenses as prepaid
+						otherCurrentAssets:
+							financialCalculations.totalRevenue * 0.02, // 2% of revenue as other assets
 					},
 					fixedAssets: {
-						propertyPlantEquipment: 100000,
-						accumulatedDepreciation: -20000,
-						netFixedAssets: 80000,
+						propertyPlantEquipment: ownerEquity * 0.8, // 80% of equity as fixed assets
+						accumulatedDepreciation:
+							-financialCalculations.depreciation,
+						netFixedAssets:
+							ownerEquity * 0.8 -
+							financialCalculations.depreciation,
 					},
 					totalAssets: 0, // Will be calculated
 				},
 				liabilities: {
 					currentLiabilities: {
-						accountsPayable: 15000,
-						accruedExpenses: 8000,
-						shortTermDebt: 10000,
-						otherCurrentLiabilities: 2000,
+						accountsPayable: accountsPayable,
+						accruedExpenses: accruedExpenses,
+						shortTermDebt: financialCalculations.totalRevenue * 0.1, // 10% of revenue as short-term debt
+						otherCurrentLiabilities:
+							financialCalculations.totalRevenue * 0.02, // 2% of revenue as other liabilities
 					},
 					longTermLiabilities: {
-						longTermDebt: 50000,
-						otherLongTermLiabilities: 5000,
+						longTermDebt: ownerEquity * 0.3, // 30% of equity as long-term debt
+						otherLongTermLiabilities:
+							financialCalculations.totalRevenue * 0.05, // 5% of revenue as other long-term liabilities
 					},
 					totalLiabilities: 0, // Will be calculated
 				},
 				equity: {
-					ownerEquity: 100000,
-					retainedEarnings: totalRevenue * 0.1, // Assuming 10% profit margin
+					ownerEquity: ownerEquity,
+					retainedEarnings: Math.max(0, netIncome * 0.8), // 80% of net income as retained earnings
 					totalEquity: 0, // Will be calculated
 				},
 				revenue: {
-					grossSales: totalRevenue,
+					grossSales: financialCalculations.totalRevenue,
 					salesReturns: 0,
-					netSales: totalRevenue,
+					netSales: financialCalculations.totalRevenue,
 				},
 				costOfGoodsSold: {
-					openingInventory: inventoryValue * 0.8,
-					purchases: inventoryValue * 0.3,
-					closingInventory: inventoryValue,
-					totalCOGS: 0, // Will be calculated
+					openingInventory: financialCalculations.openingInventory,
+					purchases: financialCalculations.purchases,
+					closingInventory: financialCalculations.closingInventory,
+					totalCOGS: financialCalculations.totalCOGS,
 				},
 				operatingExpenses: {
-					salaries: 20000,
-					rent: 12000,
-					utilities: 3000,
-					marketing: 5000,
-					depreciation: 20000,
-					otherOperatingExpenses: 5000,
-					totalOperatingExpenses: 0, // Will be calculated
+					salaries: financialCalculations.salaries,
+					rent: financialCalculations.rent,
+					utilities: financialCalculations.utilities,
+					marketing: financialCalculations.marketing,
+					depreciation: financialCalculations.depreciation,
+					otherOperatingExpenses:
+						financialCalculations.otherOperatingExpenses,
+					totalOperatingExpenses:
+						financialCalculations.totalOperatingExpenses,
 				},
 				netIncome: {
-					grossProfit: 0,
-					operatingIncome: 0,
-					otherIncome: 0,
-					interestExpense: 2000,
-					taxes: 5000,
-					netIncome: 0,
+					grossProfit: grossProfit,
+					operatingIncome: operatingIncome,
+					otherIncome: financialCalculations.totalRevenue * 0.02, // 2% of revenue as other income
+					interestExpense: financialCalculations.totalRevenue * 0.01, // 1% of revenue as interest expense
+					taxes: financialCalculations.incomeTax,
+					netIncome: netIncome,
 				},
 				cashFlow: {
 					operating: {
-						netIncome: 0,
-						depreciation: 20000,
-						changesInWorkingCapital: 0,
-						netOperatingCashFlow: 0,
+						netIncome: netIncome,
+						depreciation: financialCalculations.depreciation,
+						changesInWorkingCapital:
+							(financialCalculations.accountsReceivable -
+								accountsPayable) *
+							0.1,
+						netOperatingCashFlow: 0, // Will be calculated
 					},
 					investing: {
-						capitalExpenditures: -10000,
-						assetPurchases: -5000,
-						netInvestingCashFlow: 0,
+						capitalExpenditures:
+							-financialCalculations.totalRevenue * 0.05, // 5% of revenue as capital expenditures
+						assetPurchases:
+							-financialCalculations.totalRevenue * 0.02, // 2% of revenue as asset purchases
+						netInvestingCashFlow: 0, // Will be calculated
 					},
 					financing: {
 						debtIssuance: 0,
-						debtRepayment: -5000,
-						ownerDrawings: -10000,
-						netFinancingCashFlow: 0,
+						debtRepayment:
+							-financialCalculations.totalRevenue * 0.03, // 3% of revenue as debt repayment
+						ownerDrawings: -netIncome * 0.2, // 20% of net income as owner drawings
+						netFinancingCashFlow: 0, // Will be calculated
 					},
 					netCashFlow: 0,
-					beginningCash: 30000,
-					endingCash: 0,
+					beginningCash: financialCalculations.beginningCash,
+					endingCash: financialCalculations.endingCash,
 				},
 				taxInfo: {
-					gstCollected: totalRevenue * 0.18, // Assuming 18% GST
-					gstPaid: 5000,
-					netGST: 0,
-					incomeTax: 5000,
-					totalTaxLiability: 0,
+					gstCollected: financialCalculations.gstCollected,
+					gstPaid: financialCalculations.gstPaid,
+					netGST:
+						financialCalculations.gstCollected -
+						financialCalculations.gstPaid,
+					incomeTax: financialCalculations.incomeTax,
+					totalTaxLiability:
+						financialCalculations.gstCollected -
+						financialCalculations.gstPaid +
+						financialCalculations.incomeTax,
 				},
 			};
 
 			// Calculate totals
-			mockFinancialData.assets.totalAssets =
-				mockFinancialData.assets.currentAssets.cash +
-				mockFinancialData.assets.currentAssets.accountsReceivable +
-				mockFinancialData.assets.currentAssets.inventory +
-				mockFinancialData.assets.currentAssets.prepaidExpenses +
-				mockFinancialData.assets.currentAssets.otherCurrentAssets +
-				mockFinancialData.assets.fixedAssets.netFixedAssets;
+			financialData.assets.totalAssets =
+				financialData.assets.currentAssets.cash +
+				financialData.assets.currentAssets.accountsReceivable +
+				financialData.assets.currentAssets.inventory +
+				financialData.assets.currentAssets.prepaidExpenses +
+				financialData.assets.currentAssets.otherCurrentAssets +
+				financialData.assets.fixedAssets.netFixedAssets;
 
-			mockFinancialData.liabilities.totalLiabilities =
-				mockFinancialData.liabilities.currentLiabilities
-					.accountsPayable +
-				mockFinancialData.liabilities.currentLiabilities
-					.accruedExpenses +
-				mockFinancialData.liabilities.currentLiabilities.shortTermDebt +
-				mockFinancialData.liabilities.currentLiabilities
+			financialData.liabilities.totalLiabilities =
+				financialData.liabilities.currentLiabilities.accountsPayable +
+				financialData.liabilities.currentLiabilities.accruedExpenses +
+				financialData.liabilities.currentLiabilities.shortTermDebt +
+				financialData.liabilities.currentLiabilities
 					.otherCurrentLiabilities +
-				mockFinancialData.liabilities.longTermLiabilities.longTermDebt +
-				mockFinancialData.liabilities.longTermLiabilities
+				financialData.liabilities.longTermLiabilities.longTermDebt +
+				financialData.liabilities.longTermLiabilities
 					.otherLongTermLiabilities;
 
-			mockFinancialData.equity.totalEquity =
-				mockFinancialData.equity.ownerEquity +
-				mockFinancialData.equity.retainedEarnings;
+			financialData.equity.totalEquity =
+				financialData.equity.ownerEquity +
+				financialData.equity.retainedEarnings;
 
-			setFinancialData(mockFinancialData);
+			// Calculate cash flow totals
+			financialData.cashFlow.operating.netOperatingCashFlow =
+				financialData.cashFlow.operating.netIncome +
+				financialData.cashFlow.operating.depreciation +
+				financialData.cashFlow.operating.changesInWorkingCapital;
+
+			financialData.cashFlow.investing.netInvestingCashFlow =
+				financialData.cashFlow.investing.capitalExpenditures +
+				financialData.cashFlow.investing.assetPurchases;
+
+			financialData.cashFlow.financing.netFinancingCashFlow =
+				financialData.cashFlow.financing.debtIssuance +
+				financialData.cashFlow.financing.debtRepayment +
+				financialData.cashFlow.financing.ownerDrawings;
+
+			financialData.cashFlow.netCashFlow =
+				financialData.cashFlow.operating.netOperatingCashFlow +
+				financialData.cashFlow.investing.netInvestingCashFlow +
+				financialData.cashFlow.financing.netFinancingCashFlow;
+
+			financialData.cashFlow.endingCash =
+				financialData.cashFlow.beginningCash +
+				financialData.cashFlow.netCashFlow;
+
+			setFinancialData(financialData);
 		} catch (error) {
 			console.error("Error calculating balance sheet:", error);
 		} finally {
