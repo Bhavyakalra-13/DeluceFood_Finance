@@ -136,12 +136,12 @@ const InvoiceGenerator: React.FC<InvoiceGeneratorProps> = ({
 		>
 			<div 
 				ref={modalRef}
-				className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-5xl w-full max-h-[95vh] overflow-hidden flex flex-col"
+				className="bg-white dark:bg-boxdark rounded-lg shadow-xl max-w-5xl w-full max-h-[95vh] overflow-hidden flex flex-col border border-stroke dark:border-strokedark"
 				onClick={(e) => e.stopPropagation()}
 			>
 				{/* Header */}
-				<div className="flex justify-between items-center p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
-					<h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
+				<div className="flex justify-between items-center p-4 sm:p-6 border-b border-stroke dark:border-strokedark flex-shrink-0">
+					<h2 className="text-xl sm:text-2xl font-bold text-black dark:text-white">
 						Invoice Preview
 					</h2>
 					<div className="flex flex-wrap gap-2">
@@ -164,7 +164,7 @@ const InvoiceGenerator: React.FC<InvoiceGeneratorProps> = ({
 						</button>
 						<button
 							onClick={onClose}
-							className="px-3 py-1.5 sm:px-4 sm:py-2 bg-gray-500 text-white text-sm rounded-md hover:bg-gray-600 transition duration-300">
+							className="px-3 py-1.5 sm:px-4 sm:py-2 bg-body text-white text-sm rounded-md hover:bg-opacity-80 transition duration-300 dark:bg-meta-4 dark:hover:bg-meta-3">
 							Close
 						</button>
 					</div>

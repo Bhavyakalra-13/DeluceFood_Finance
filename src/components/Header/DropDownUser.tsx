@@ -17,15 +17,15 @@ const DropdownUser = () => {
 				className="flex items-center gap-2"
 				href="#">
 				<span className="h-8 w-8 rounded-full">
-					<div className="relative inline-flex items-center justify-center w-8 h-8 overflow-hidden bg-slate-300 rounded-full dark:bg-slate-200">
-						<span className="font-medium text-gray-600 dark:text-gray-300">
+					<div className="relative inline-flex items-center justify-center w-8 h-8 overflow-hidden bg-gray rounded-full dark:bg-meta-4">
+						<span className="font-medium text-black dark:text-white">
 							{user?.email?.charAt(0).toUpperCase()}
 						</span>
 					</div>
 				</span>
 
 				<svg
-					className="hidden fill-current sm:block dark:text-white"
+					className="hidden fill-current sm:block text-black dark:text-white"
 					width="12"
 					height="8"
 					viewBox="0 0 12 8"

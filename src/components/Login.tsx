@@ -23,16 +23,16 @@ const Login = () => {
 	return (
 		<form
 			onSubmit={handleLogin}
-			className="flex flex-col p-8 gap-4 text-bodydark w-2/3 mx-auto h-[86vh] justify-center">
+			className="flex flex-col p-8 gap-4 text-body dark:text-bodydark w-2/3 mx-auto h-[86vh] justify-center">
 			<label
 				htmlFor="input-group-1"
-				className="block mb-1 text-sm font-medium text-gray-900 dark:text-white">
+				className="block mb-1 text-sm font-medium text-black dark:text-white">
 				Your Email
 			</label>
 			<div className="relative mb-2">
 				<div className="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
 					<svg
-						className="w-4 h-4 text-gray-500 dark:text-gray-400"
+						className="w-4 h-4 text-body dark:text-bodydark"
 						aria-hidden="true"
 						xmlns="http://www.w3.org/2000/svg"
 						fill="currentColor"
@@ -46,20 +46,20 @@ const Login = () => {
 					value={email}
 					onChange={(e) => setEmail(e.target.value)}
 					id="input-group-1"
-					className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5 "
+					className="bg-white border border-stroke text-black text-sm rounded-lg focus:ring-primary focus:border-primary block w-full ps-10 p-2.5 dark:bg-form-input dark:border-form-strokedark dark:text-white"
 					placeholder="name@flowbite.com"
 				/>
 			</div>
 			<label
 				htmlFor="password-field"
-				className="block mb-1 text-sm font-medium text-gray-900 dark:text-white">
+				className="block mb-1 text-sm font-medium text-black dark:text-white">
 				Password
 			</label>
 
 			<div className="relative mb-2">
 				<div className="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
 					<svg
-						className="w-4 h-4 text-gray-500 dark:text-gray-400"
+						className="w-4 h-4 text-body dark:text-bodydark"
 						aria-hidden="true"
 						xmlns="http://www.w3.org/2000/svg"
 						fill="currentColor"
@@ -73,18 +73,18 @@ const Login = () => {
 					value={password}
 					onChange={(e) => setPassword(e.target.value)}
 					id="password-field"
-					className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5 "
+					className="bg-white border border-stroke text-black text-sm rounded-lg focus:ring-primary focus:border-primary block w-full ps-10 p-2.5 dark:bg-form-input dark:border-form-strokedark dark:text-white"
 					placeholder="abs#8*12UP0"
 				/>
 			</div>
 			<button
 				type="submit"
-				className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">
+				className="text-white bg-primary hover:bg-opacity-90 focus:ring-4 focus:ring-primary font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 focus:outline-none">
 				Login
 			</button>
 
 			{loginError && (
-				<p className="text-red-500 text-sm">
+				<p className="text-danger text-sm">
 					No Access or wrong credentials
 				</p>
 			)}

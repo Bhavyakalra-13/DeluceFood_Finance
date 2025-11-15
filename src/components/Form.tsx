@@ -161,58 +161,58 @@ const Form = () => {
 	};
 
 	return (
-		<div className="w-full mx-auto p-6 bg-white dark:bg-slate-700 shadow-lg rounded-lg">
-			<h2 className="text-2xl font-semibold mb-6 text-gray-900 dark:text-gray-100">
+		<div className="w-full mx-auto p-6 bg-white dark:bg-boxdark shadow-lg rounded-lg border border-stroke dark:border-strokedark">
+			<h2 className="text-2xl font-semibold mb-6 text-black dark:text-white">
 				Create Invoice
 			</h2>
 
 			<form onSubmit={handleSubmit} className="space-y-8">
 				{/* Invoice Details Section */}
-				<div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
-					<h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">
+				<div className="bg-gray-2 dark:bg-boxdark-2 p-4 rounded-lg border border-stroke dark:border-strokedark">
+					<h3 className="text-lg font-semibold mb-4 text-black dark:text-white">
 						Invoice Details
 					</h3>
 					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-						<label className="block text-gray-700 dark:text-gray-300">
+						<label className="block text-body dark:text-bodydark">
 							Invoice Number:
 							<input
 								type="text"
 								name="invoiceNumber"
 								value={formData.invoiceNumber}
 								onChange={handleChange}
-								className="mt-1 w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+								className="mt-1 w-full p-2 border border-stroke rounded-md bg-white text-black dark:bg-form-input dark:border-form-strokedark dark:text-white"
 								required
 							/>
 						</label>
-						<label className="block text-gray-700 dark:text-gray-300">
+						<label className="block text-body dark:text-bodydark">
 							Invoice Date:
 							<input
 								type="date"
 								name="invoiceDate"
 								value={formData.invoiceDate}
 								onChange={handleChange}
-								className="mt-1 w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+								className="mt-1 w-full p-2 border border-stroke rounded-md bg-white text-black dark:bg-form-input dark:border-form-strokedark dark:text-white"
 								required
 							/>
 						</label>
-						<label className="block text-gray-700 dark:text-gray-300">
+						<label className="block text-body dark:text-bodydark">
 							Due Date:
 							<input
 								type="date"
 								name="dueDate"
 								value={formData.dueDate}
 								onChange={handleChange}
-								className="mt-1 w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+								className="mt-1 w-full p-2 border border-stroke rounded-md bg-white text-black dark:bg-form-input dark:border-form-strokedark dark:text-white"
 								required
 							/>
 						</label>
-						<label className="block text-gray-700 dark:text-gray-300">
+						<label className="block text-body dark:text-bodydark">
 							Payment Status:
 							<select
 								name="paymentStatus"
 								value={formData.paymentStatus}
 								onChange={handleChange}
-								className="mt-1 w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+								className="mt-1 w-full p-2 border border-stroke rounded-md bg-white text-black dark:bg-form-input dark:border-form-strokedark dark:text-white"
 								required>
 								<option value="">Select Status</option>
 								<option value="Draft">Draft</option>
@@ -225,12 +225,12 @@ const Form = () => {
 				</div>
 
 				{/* Buyer Details Section */}
-				<div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
-					<h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">
+				<div className="bg-gray-2 dark:bg-boxdark-2 p-4 rounded-lg border border-stroke dark:border-strokedark">
+					<h3 className="text-lg font-semibold mb-4 text-black dark:text-white">
 						Buyer Details
 					</h3>
 					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-						<label className="block text-gray-700 dark:text-gray-300">
+						<label className="block text-body dark:text-bodydark">
 							Customer:
 							<select
 								name="buyerName"
@@ -255,7 +255,7 @@ const Form = () => {
 											selectedCustomer?.pincode || "",
 									});
 								}}
-								className="mt-1 w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+								className="mt-1 w-full p-2 border border-stroke rounded-md bg-white text-black dark:bg-form-input dark:border-form-strokedark dark:text-white"
 								required>
 								<option value="">Select a customer</option>
 								{customers.map((customer) => (
@@ -274,7 +274,7 @@ const Form = () => {
 								name="buyerEmail"
 								value={formData.buyerEmail}
 								onChange={handleChange}
-								className="mt-1 w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+								className="mt-1 w-full p-2 border border-stroke rounded-md bg-white text-black dark:bg-form-input dark:border-form-strokedark dark:text-white"
 								required
 							/>
 						</label>
@@ -285,7 +285,7 @@ const Form = () => {
 								name="buyerPhone"
 								value={formData.buyerPhone}
 								onChange={handleChange}
-								className="mt-1 w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+								className="mt-1 w-full p-2 border border-stroke rounded-md bg-white text-black dark:bg-form-input dark:border-form-strokedark dark:text-white"
 								required
 							/>
 						</label>
@@ -296,7 +296,7 @@ const Form = () => {
 								name="buyerCity"
 								value={formData.buyerCity}
 								onChange={handleChange}
-								className="mt-1 w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+								className="mt-1 w-full p-2 border border-stroke rounded-md bg-white text-black dark:bg-form-input dark:border-form-strokedark dark:text-white"
 								required
 							/>
 						</label>
@@ -307,7 +307,7 @@ const Form = () => {
 								name="buyerState"
 								value={formData.buyerState}
 								onChange={handleChange}
-								className="mt-1 w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+								className="mt-1 w-full p-2 border border-stroke rounded-md bg-white text-black dark:bg-form-input dark:border-form-strokedark dark:text-white"
 								required
 							/>
 						</label>
@@ -318,12 +318,12 @@ const Form = () => {
 								name="buyerPincode"
 								value={formData.buyerPincode}
 								onChange={handleChange}
-								className="mt-1 w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+								className="mt-1 w-full p-2 border border-stroke rounded-md bg-white text-black dark:bg-form-input dark:border-form-strokedark dark:text-white"
 								required
 							/>
 						</label>
 					</div>
-					<label className="block mt-4 text-gray-700 dark:text-gray-300">
+					<label className="block mt-4 text-body dark:text-bodydark">
 						Address:
 						<textarea
 							name="buyerAddress"
@@ -334,7 +334,7 @@ const Form = () => {
 									buyerAddress: e.target.value,
 								})
 							}
-							className="mt-1 w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+							className="mt-1 w-full p-2 border border-stroke rounded-md bg-white text-black dark:bg-form-input dark:border-form-strokedark dark:text-white"
 							rows={3}
 							required
 						/>
@@ -342,12 +342,12 @@ const Form = () => {
 				</div>
 
 				{/* Product Details Section */}
-				<div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
-					<h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">
+				<div className="bg-gray-2 dark:bg-boxdark-2 p-4 rounded-lg border border-stroke dark:border-strokedark">
+					<h3 className="text-lg font-semibold mb-4 text-black dark:text-white">
 						Product Details
 					</h3>
 					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-						<label className="block text-gray-700 dark:text-gray-300">
+						<label className="block text-body dark:text-bodydark">
 							Product:
 							<select
 								name="product"
@@ -365,7 +365,7 @@ const Form = () => {
 										taxRate: selectedProduct?.taxRate || 0,
 									});
 								}}
-								className="mt-1 w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+								className="mt-1 w-full p-2 border border-stroke rounded-md bg-white text-black dark:bg-form-input dark:border-form-strokedark dark:text-white"
 								required>
 								<option value="">Select a product</option>
 								{products.map((product) => (
@@ -385,7 +385,7 @@ const Form = () => {
 								name="price"
 								value={formData.price}
 								onChange={handleChange}
-								className="mt-1 w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+								className="mt-1 w-full p-2 border border-stroke rounded-md bg-white text-black dark:bg-form-input dark:border-form-strokedark dark:text-white"
 								required
 								min="0"
 								step="0.01"
@@ -398,7 +398,7 @@ const Form = () => {
 								name="quantity"
 								value={formData.quantity}
 								onChange={handleChange}
-								className="mt-1 w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+								className="mt-1 w-full p-2 border border-stroke rounded-md bg-white text-black dark:bg-form-input dark:border-form-strokedark dark:text-white"
 								required
 								min="1"
 							/>
@@ -409,7 +409,7 @@ const Form = () => {
 								name="taxRate"
 								value={formData.taxRate}
 								onChange={handleChange}
-								className="mt-1 w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+								className="mt-1 w-full p-2 border border-stroke rounded-md bg-white text-black dark:bg-form-input dark:border-form-strokedark dark:text-white"
 								required>
 								<option value="0">0%</option>
 								<option value="5">5%</option>
@@ -424,13 +424,13 @@ const Form = () => {
 								name="discount"
 								value={formData.discount}
 								onChange={handleChange}
-								className="mt-1 w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+								className="mt-1 w-full p-2 border border-stroke rounded-md bg-white text-black dark:bg-form-input dark:border-form-strokedark dark:text-white"
 								min="0"
 								step="0.01"
 							/>
 						</label>
 					</div>
-					<label className="block mt-4 text-gray-700 dark:text-gray-300">
+					<label className="block mt-4 text-body dark:text-bodydark">
 						Product Description:
 						<textarea
 							name="description"
@@ -441,15 +441,15 @@ const Form = () => {
 									description: e.target.value,
 								})
 							}
-							className="mt-1 w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+							className="mt-1 w-full p-2 border border-stroke rounded-md bg-white text-black dark:bg-form-input dark:border-form-strokedark dark:text-white"
 							rows={3}
 						/>
 					</label>
 				</div>
 
 				{/* GST Details Section */}
-				<div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
-					<h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">
+				<div className="bg-gray-2 dark:bg-boxdark-2 p-4 rounded-lg border border-stroke dark:border-strokedark">
+					<h3 className="text-lg font-semibold mb-4 text-black dark:text-white">
 						GST Details
 					</h3>
 					<div className="space-y-4">
@@ -463,33 +463,33 @@ const Form = () => {
 										isGSTBill: e.target.checked,
 									})
 								}
-								className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600"
+								className="w-5 h-5 text-primary border-stroke rounded focus:ring-primary dark:bg-form-input dark:border-form-strokedark"
 							/>
-							<span className="text-gray-700 dark:text-gray-300 font-medium">
+							<span className="text-body dark:text-bodydark font-medium">
 								Generate GST Bill
 							</span>
 						</label>
 						{formData.isGSTBill && (
 							<div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-								<label className="block text-gray-700 dark:text-gray-300">
+								<label className="block text-body dark:text-bodydark">
 									Seller GSTIN:
 									<select
 										name="sellerGST"
 										value={formData.sellerGST || "hgggg"}
 										onChange={handleChange}
-										className="mt-1 w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+										className="mt-1 w-full p-2 border border-stroke rounded-md bg-white text-black dark:bg-form-input dark:border-form-strokedark dark:text-white"
 										required>
 										<option value="hgggg">hgggg</option>
 									</select>
 								</label>
-								<label className="block text-gray-700 dark:text-gray-300">
+								<label className="block text-body dark:text-bodydark">
 									Customer GSTIN:
 									<input
 										type="text"
 										name="customerGST"
 										value={formData.customerGST || ""}
 										onChange={handleChange}
-										className="mt-1 w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+										className="mt-1 w-full p-2 border border-stroke rounded-md bg-white text-black dark:bg-form-input dark:border-form-strokedark dark:text-white"
 										placeholder="Enter customer GSTIN (optional)"
 									/>
 								</label>
@@ -499,11 +499,11 @@ const Form = () => {
 				</div>
 
 				{/* Additional Notes */}
-				<div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
-					<h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">
+				<div className="bg-gray-2 dark:bg-boxdark-2 p-4 rounded-lg border border-stroke dark:border-strokedark">
+					<h3 className="text-lg font-semibold mb-4 text-black dark:text-white">
 						Additional Information
 					</h3>
-					<label className="block text-gray-700 dark:text-gray-300">
+					<label className="block text-body dark:text-bodydark">
 						Notes:
 						<textarea
 							name="notes"
@@ -514,7 +514,7 @@ const Form = () => {
 									notes: e.target.value,
 								})
 							}
-							className="mt-1 w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+							className="mt-1 w-full p-2 border border-stroke rounded-md bg-white text-black dark:bg-form-input dark:border-form-strokedark dark:text-white"
 							rows={3}
 							placeholder="Any additional notes or terms..."
 						/>
@@ -525,12 +525,12 @@ const Form = () => {
 				<div className="flex justify-end space-x-4">
 					<button
 						type="button"
-						className="px-6 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition duration-300">
+						className="px-6 py-2 border border-stroke dark:border-strokedark rounded-md text-body dark:text-bodydark hover:bg-gray dark:hover:bg-meta-4 transition duration-300">
 						Save as Draft
 					</button>
 					<button
 						type="submit"
-						className="px-6 py-2 bg-blue-500 dark:bg-blue-600 text-white rounded-md hover:bg-blue-600 dark:hover:bg-blue-700 transition duration-300">
+						className="px-6 py-2 bg-primary text-white rounded-md hover:bg-opacity-90 transition duration-300">
 						Preview Invoice
 					</button>
 				</div>

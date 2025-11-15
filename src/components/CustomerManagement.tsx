@@ -145,18 +145,18 @@ const CustomerManagement: React.FC = () => {
 	};
 
 	if (loading) {
-		return <div className="text-center py-8">Loading customers...</div>;
+		return <div className="text-center py-8 text-black dark:text-white">Loading customers...</div>;
 	}
 
 	return (
 		<div className="p-6">
 			<div className="flex justify-between items-center mb-6">
-				<h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+				<h2 className="text-2xl font-bold text-black dark:text-white">
 					Customer Management
 				</h2>
 				<button
 					onClick={() => setShowForm(true)}
-					className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition duration-300">
+					className="px-4 py-2 bg-primary text-white rounded-md hover:bg-opacity-90 transition duration-300">
 					Add Customer
 				</button>
 			</div>
@@ -164,9 +164,9 @@ const CustomerManagement: React.FC = () => {
 			{/* Customer Form Modal */}
 			{showForm && (
 				<div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-					<div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+					<div className="bg-white dark:bg-boxdark rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-stroke dark:border-strokedark">
 						<div className="p-6">
-							<h3 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
+							<h3 className="text-xl font-semibold mb-4 text-black dark:text-white">
 								{editingCustomer
 									? "Edit Customer"
 									: "Add New Customer"}
@@ -175,7 +175,7 @@ const CustomerManagement: React.FC = () => {
 							<form onSubmit={handleSubmit} className="space-y-4">
 								<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 									<div>
-										<label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+										<label className="block text-sm font-medium text-body dark:text-bodydark mb-1">
 											Customer Name *
 										</label>
 										<input
@@ -187,12 +187,12 @@ const CustomerManagement: React.FC = () => {
 													name: e.target.value,
 												})
 											}
-											className="w-full p-2 border border-gray-300 rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+											className="w-full p-2 border border-stroke rounded-md bg-white text-black dark:bg-form-input dark:border-form-strokedark dark:text-white"
 											required
 										/>
 									</div>
 									<div>
-										<label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+										<label className="block text-sm font-medium text-body dark:text-bodydark mb-1">
 											Email *
 										</label>
 										<input
@@ -204,12 +204,12 @@ const CustomerManagement: React.FC = () => {
 													email: e.target.value,
 												})
 											}
-											className="w-full p-2 border border-gray-300 rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+											className="w-full p-2 border border-stroke rounded-md bg-white text-black dark:bg-form-input dark:border-form-strokedark dark:text-white"
 											required
 										/>
 									</div>
 									<div>
-										<label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+										<label className="block text-sm font-medium text-body dark:text-bodydark mb-1">
 											Phone *
 										</label>
 										<input
@@ -221,12 +221,12 @@ const CustomerManagement: React.FC = () => {
 													phone: e.target.value,
 												})
 											}
-											className="w-full p-2 border border-gray-300 rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+											className="w-full p-2 border border-stroke rounded-md bg-white text-black dark:bg-form-input dark:border-form-strokedark dark:text-white"
 											required
 										/>
 									</div>
 									<div>
-										<label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+										<label className="block text-sm font-medium text-body dark:text-bodydark mb-1">
 											Company
 										</label>
 										<input
@@ -238,11 +238,11 @@ const CustomerManagement: React.FC = () => {
 													company: e.target.value,
 												})
 											}
-											className="w-full p-2 border border-gray-300 rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+											className="w-full p-2 border border-stroke rounded-md bg-white text-black dark:bg-form-input dark:border-form-strokedark dark:text-white"
 										/>
 									</div>
 									<div>
-										<label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+										<label className="block text-sm font-medium text-body dark:text-bodydark mb-1">
 											GST Number
 										</label>
 										<input
@@ -254,11 +254,11 @@ const CustomerManagement: React.FC = () => {
 													gstNumber: e.target.value,
 												})
 											}
-											className="w-full p-2 border border-gray-300 rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+											className="w-full p-2 border border-stroke rounded-md bg-white text-black dark:bg-form-input dark:border-form-strokedark dark:text-white"
 										/>
 									</div>
 									<div>
-										<label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+										<label className="block text-sm font-medium text-body dark:text-bodydark mb-1">
 											City *
 										</label>
 										<input
@@ -270,12 +270,12 @@ const CustomerManagement: React.FC = () => {
 													city: e.target.value,
 												})
 											}
-											className="w-full p-2 border border-gray-300 rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+											className="w-full p-2 border border-stroke rounded-md bg-white text-black dark:bg-form-input dark:border-form-strokedark dark:text-white"
 											required
 										/>
 									</div>
 									<div>
-										<label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+										<label className="block text-sm font-medium text-body dark:text-bodydark mb-1">
 											State *
 										</label>
 										<input
@@ -287,12 +287,12 @@ const CustomerManagement: React.FC = () => {
 													state: e.target.value,
 												})
 											}
-											className="w-full p-2 border border-gray-300 rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+											className="w-full p-2 border border-stroke rounded-md bg-white text-black dark:bg-form-input dark:border-form-strokedark dark:text-white"
 											required
 										/>
 									</div>
 									<div>
-										<label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+										<label className="block text-sm font-medium text-body dark:text-bodydark mb-1">
 											Pincode *
 										</label>
 										<input
@@ -304,14 +304,14 @@ const CustomerManagement: React.FC = () => {
 													pincode: e.target.value,
 												})
 											}
-											className="w-full p-2 border border-gray-300 rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+											className="w-full p-2 border border-stroke rounded-md bg-white text-black dark:bg-form-input dark:border-form-strokedark dark:text-white"
 											required
 										/>
 									</div>
 								</div>
 
 								<div>
-									<label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+									<label className="block text-sm font-medium text-body dark:text-bodydark mb-1">
 										Address *
 									</label>
 									<textarea
@@ -322,7 +322,7 @@ const CustomerManagement: React.FC = () => {
 												address: e.target.value,
 											})
 										}
-										className="w-full p-2 border border-gray-300 rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+										className="w-full p-2 border border-stroke rounded-md bg-white text-black dark:bg-form-input dark:border-form-strokedark dark:text-white"
 										rows={3}
 										required
 									/>
@@ -332,12 +332,12 @@ const CustomerManagement: React.FC = () => {
 									<button
 										type="button"
 										onClick={handleCancel}
-										className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
+										className="px-4 py-2 border border-stroke dark:border-strokedark rounded-md text-body dark:text-bodydark hover:bg-gray dark:hover:bg-meta-4">
 										Cancel
 									</button>
 									<button
 										type="submit"
-										className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+										className="px-4 py-2 bg-primary text-white rounded-md hover:bg-opacity-90">
 										{editingCustomer
 											? "Update Customer"
 											: "Add Customer"}
@@ -350,58 +350,58 @@ const CustomerManagement: React.FC = () => {
 			)}
 
 			{/* Customers Table */}
-			<div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
-				<table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-					<thead className="bg-gray-50 dark:bg-gray-700">
+			<div className="bg-white dark:bg-boxdark rounded-lg shadow overflow-hidden border border-stroke dark:border-strokedark">
+				<table className="min-w-full divide-y divide-stroke dark:divide-strokedark">
+					<thead className="bg-gray-2 dark:bg-meta-4">
 						<tr>
-							<th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+							<th className="px-6 py-3 text-left text-xs font-medium text-body dark:text-bodydark2 uppercase tracking-wider">
 								Customer
 							</th>
-							<th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+							<th className="px-6 py-3 text-left text-xs font-medium text-body dark:text-bodydark2 uppercase tracking-wider">
 								Contact
 							</th>
-							<th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+							<th className="px-6 py-3 text-left text-xs font-medium text-body dark:text-bodydark2 uppercase tracking-wider">
 								Company
 							</th>
-							<th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+							<th className="px-6 py-3 text-left text-xs font-medium text-body dark:text-bodydark2 uppercase tracking-wider">
 								Location
 							</th>
-							<th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+							<th className="px-6 py-3 text-left text-xs font-medium text-body dark:text-bodydark2 uppercase tracking-wider">
 								Actions
 							</th>
 						</tr>
 					</thead>
-					<tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+					<tbody className="bg-white dark:bg-boxdark divide-y divide-stroke dark:divide-strokedark">
 						{customers.map((customer) => (
 							<tr key={customer.id}>
 								<td className="px-6 py-4 whitespace-nowrap">
 									<div>
-										<div className="text-sm font-medium text-gray-900 dark:text-white">
+										<div className="text-sm font-medium text-black dark:text-white">
 											{customer.name}
 										</div>
 										{customer.gstNumber && (
-											<div className="text-sm text-gray-500 dark:text-gray-400">
+											<div className="text-sm text-body dark:text-bodydark">
 												GST: {customer.gstNumber}
 											</div>
 										)}
 									</div>
 								</td>
 								<td className="px-6 py-4 whitespace-nowrap">
-									<div className="text-sm text-gray-900 dark:text-white">
+									<div className="text-sm text-black dark:text-white">
 										{customer.email}
 									</div>
-									<div className="text-sm text-gray-500 dark:text-gray-400">
+									<div className="text-sm text-body dark:text-bodydark">
 										{customer.phone}
 									</div>
 								</td>
-								<td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+								<td className="px-6 py-4 whitespace-nowrap text-sm text-black dark:text-white">
 									{customer.company || "N/A"}
 								</td>
 								<td className="px-6 py-4 whitespace-nowrap">
-									<div className="text-sm text-gray-900 dark:text-white">
+									<div className="text-sm text-black dark:text-white">
 										{customer.city}, {customer.state}
 									</div>
-									<div className="text-sm text-gray-500 dark:text-gray-400">
+									<div className="text-sm text-body dark:text-bodydark">
 										{customer.pincode}
 									</div>
 								</td>
@@ -409,14 +409,14 @@ const CustomerManagement: React.FC = () => {
 									<div className="flex space-x-2">
 										<button
 											onClick={() => handleEdit(customer)}
-											className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300">
+											className="text-primary hover:text-opacity-80 dark:text-primary dark:hover:text-opacity-70">
 											Edit
 										</button>
 										<button
 											onClick={() =>
 												handleDelete(customer.id)
 											}
-											className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">
+											className="text-danger hover:text-opacity-80 dark:text-danger dark:hover:text-opacity-70">
 											Delete
 										</button>
 									</div>
@@ -427,7 +427,7 @@ const CustomerManagement: React.FC = () => {
 				</table>
 
 				{customers.length === 0 && (
-					<div className="text-center py-8 text-gray-500 dark:text-gray-400">
+					<div className="text-center py-8 text-body dark:text-bodydark">
 						No customers found. Add your first customer to get
 						started.
 					</div>

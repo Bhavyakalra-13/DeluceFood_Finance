@@ -72,7 +72,7 @@ const Table = () => {
 	};
 
 	if (loading) {
-		return <p>Loading...</p>;
+		return <p className="text-black dark:text-white">Loading...</p>;
 	}
 
 	return (
@@ -124,30 +124,30 @@ const Table = () => {
 
 							return (
 								<tr key={key}>
-									<td className="border-b border-[#eee] px-4 py-5 pl-9 dark:border-strokedark xl:pl-11">
+									<td className="border-b border-stroke px-4 py-5 pl-9 dark:border-strokedark xl:pl-11">
 										<h5 className="font-medium text-black dark:text-white">
 											{invoice.invoiceNumber || 'N/A'}
 										</h5>
 									</td>
-									<td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+									<td className="border-b border-stroke px-4 py-5 dark:border-strokedark">
 										<div>
 											<h5 className="font-medium text-black dark:text-white">
 												{invoice.buyerName || 'N/A'}
 											</h5>
-											<p className="text-sm text-gray-600 dark:text-gray-400">
+											<p className="text-sm text-body dark:text-bodydark">
 												{invoice.buyerEmail || 'N/A'}
 											</p>
-											<p className="text-sm text-gray-600 dark:text-gray-400">
+											<p className="text-sm text-body dark:text-bodydark">
 												{invoice.buyerPhone || 'N/A'}
 											</p>
 										</div>
 									</td>
-									<td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+									<td className="border-b border-stroke px-4 py-5 dark:border-strokedark">
 										<h5 className="font-medium text-black dark:text-white">
 											{invoice.product || 'N/A'}
 										</h5>
 										{invoice.description && (
-											<p className="text-sm text-gray-600 dark:text-gray-400">
+											<p className="text-sm text-body dark:text-bodydark">
 												{invoice.description.substring(
 													0,
 													50
@@ -156,22 +156,22 @@ const Table = () => {
 											</p>
 										)}
 									</td>
-									<td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+									<td className="border-b border-stroke px-4 py-5 dark:border-strokedark">
 										<p className="text-black dark:text-white">
 											{quantity}
 										</p>
 									</td>
-									<td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+									<td className="border-b border-stroke px-4 py-5 dark:border-strokedark">
 										<p className="text-black dark:text-white">
 											₹{price.toFixed(2)}
 										</p>
 									</td>
-									<td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+									<td className="border-b border-stroke px-4 py-5 dark:border-strokedark">
 										<p className="font-medium text-black dark:text-white">
 											₹{total.toFixed(2)}
 										</p>
 									</td>
-									<td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+									<td className="border-b border-stroke px-4 py-5 dark:border-strokedark">
 										<p
 											className={`inline-flex rounded-full bg-opacity-10 px-3 py-1 text-sm font-medium ${
 												invoice.paymentStatus === "Paid"
@@ -182,17 +182,17 @@ const Table = () => {
 													: invoice.paymentStatus ===
 													  "Sent"
 													? "bg-warning text-warning"
-													: "bg-gray-500 text-gray-500"
+													: "bg-body text-body dark:bg-bodydark dark:text-bodydark"
 											}`}>
 											{invoice.paymentStatus || 'Draft'}
 										</p>
 									</td>
-									<td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+									<td className="border-b border-stroke px-4 py-5 dark:border-strokedark">
 										<p className="text-black dark:text-white">
 											{invoice.invoiceDate ? new Date(invoice.invoiceDate).toLocaleDateString() : 'N/A'}
 										</p>
 									</td>
-									<td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+									<td className="border-b border-stroke px-4 py-5 dark:border-strokedark">
 										<div className="flex items-center space-x-3.5">
 											<button
 												onClick={() =>

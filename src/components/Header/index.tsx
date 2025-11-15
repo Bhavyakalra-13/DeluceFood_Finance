@@ -11,7 +11,7 @@ const Header = (props: {
 	const { user } = useAuth();
 
 	return (
-		<header className="sticky top-0 z-999 flex w-full bg-white drop-shadow-1 dark:bg-boxdark dark:drop-shadow-none">
+		<header className="sticky top-0 z-999 flex w-full bg-white drop-shadow-1 dark:bg-boxdark dark:drop-shadow-none text-black dark:text-bodydark">
 			<div className="flex flex-grow items-center justify-between px-4 py-4 shadow-2 md:px-6 2xl:px-11">
 				<div className="flex items-center gap-2 sm:gap-4 lg:hidden">
 					{/* <!-- Hamburger Toggle BTN --> */}
@@ -55,9 +55,9 @@ const Header = (props: {
 					{/* <!-- Hamburger Toggle BTN --> */}
 
 					<Link className="block flex-shrink-0 lg:hidden" href="/">
-						<h1 className="flex items-center text-4xl font-extrabold dark:text-white">
+						<h1 className="flex items-center text-4xl font-extrabold text-black dark:text-white">
 							Financer
-							<span className="bg-blue-100 text-blue-800 text-xs font-semibold me-2 px-1.5 py-0.5 rounded dark:bg-blue-200 dark:text-blue-800 ms-2">
+							<span className="bg-blue-100 text-blue-800 text-xs font-semibold me-2 px-1.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-200 ms-2">
 								PRO
 							</span>
 						</h1>

@@ -91,7 +91,7 @@ const Dashboard = () => {
 						) : (
 							<>
 								<div className="flex justify-between items-center mb-4">
-									<h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+									<h2 className="text-xl font-semibold text-black dark:text-white">
 										Financial Overview
 									</h2>
 									<button
@@ -212,7 +212,7 @@ const Dashboard = () => {
 		<div>
 			{/* Tab Navigation */}
 			<div className="mb-6">
-				<div className="border-b border-gray-200 dark:border-gray-700">
+				<div className="border-b border-stroke dark:border-strokedark">
 					<nav className="-mb-px flex space-x-8">
 						{tabs.map((tab) => (
 							<button
@@ -220,8 +220,8 @@ const Dashboard = () => {
 								onClick={() => setActiveTab(tab.id)}
 								className={`py-2 px-1 border-b-2 font-medium text-sm ${
 									activeTab === tab.id
-										? "border-blue-500 text-blue-600 dark:text-blue-400"
-										: "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300"
+										? "border-primary text-primary dark:text-primary"
+										: "border-transparent text-body hover:text-black hover:border-stroke dark:text-bodydark dark:hover:text-white dark:hover:border-strokedark"
 								}`}>
 								<span className="mr-2">{tab.icon}</span>
 								{tab.name}
