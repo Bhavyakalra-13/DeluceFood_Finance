@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { collection, addDoc, getDocs } from "firebase/firestore";
 import db from "@utils/firestore";
+import InvoiceGenerator from "./InvoiceGenerator";
 
 interface FormData {
 	// Product details
@@ -29,6 +30,11 @@ interface FormData {
 	taxRate: number;
 	discount: number;
 	notes?: string;
+
+	// GST fields
+	sellerGST?: string;
+	customerGST?: string;
+	isGSTBill?: boolean;
 }
 
 const Form = () => {
@@ -58,10 +64,16 @@ const Form = () => {
 		taxRate: 0,
 		discount: 0,
 		notes: "",
+
+		// GST fields
+		sellerGST: "hgggg",
+		customerGST: "",
+		isGSTBill: false,
 	});
 
 	const [products, setProducts] = useState<any[]>([]);
 	const [customers, setCustomers] = useState<any[]>([]);
+	const [showPreview, setShowPreview] = useState(false);
 
 	useEffect(() => {
 		fetchProducts();
@@ -105,13 +117,46 @@ const Form = () => {
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
+		setShowPreview(true);
+	};
 
+	const handleSaveInvoice = async () => {
 		try {
-			const docRef = await addDoc(collection(db, "invoices"), formData);
+			const invoiceData = {
+				...formData,
+				id: `INV-${Date.now()}`,
+			};
+			const docRef = await addDoc(collection(db, "invoices"), invoiceData);
 			console.log("Document written with ID: ", docRef.id);
-			alert("Form submitted successfully!");
+			alert("Invoice created successfully!");
+			setShowPreview(false);
+			// Reset form
+			setFormData({
+				product: "",
+				quantity: 0,
+				price: 0,
+				description: "",
+				buyerName: "",
+				buyerEmail: "",
+				buyerPhone: "",
+				buyerAddress: "",
+				buyerCity: "",
+				buyerState: "",
+				buyerPincode: "",
+				invoiceDate: "",
+				dueDate: "",
+				paymentStatus: "",
+				invoiceNumber: `INV-${Date.now()}`,
+				taxRate: 0,
+				discount: 0,
+				notes: "",
+				sellerGST: "hgggg",
+				customerGST: "",
+				isGSTBill: false,
+			});
 		} catch (e) {
 			console.error("Error adding document: ", e);
+			alert("Error creating invoice. Please try again.");
 		}
 	};
 
@@ -359,17 +404,18 @@ const Form = () => {
 							/>
 						</label>
 						<label className="block text-gray-700 dark:text-gray-300">
-							Tax Rate (%):
-							<input
-								type="number"
+							GST Rate (%):
+							<select
 								name="taxRate"
 								value={formData.taxRate}
 								onChange={handleChange}
 								className="mt-1 w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
-								min="0"
-								max="100"
-								step="0.01"
-							/>
+								required>
+								<option value="0">0%</option>
+								<option value="5">5%</option>
+								<option value="12">12%</option>
+								<option value="18">18%</option>
+							</select>
 						</label>
 						<label className="block text-gray-700 dark:text-gray-300">
 							Discount (₹):
@@ -399,6 +445,57 @@ const Form = () => {
 							rows={3}
 						/>
 					</label>
+				</div>
+
+				{/* GST Details Section */}
+				<div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+					<h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">
+						GST Details
+					</h3>
+					<div className="space-y-4">
+						<label className="flex items-center space-x-3 cursor-pointer">
+							<input
+								type="checkbox"
+								checked={formData.isGSTBill || false}
+								onChange={(e) =>
+									setFormData({
+										...formData,
+										isGSTBill: e.target.checked,
+									})
+								}
+								className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600"
+							/>
+							<span className="text-gray-700 dark:text-gray-300 font-medium">
+								Generate GST Bill
+							</span>
+						</label>
+						{formData.isGSTBill && (
+							<div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+								<label className="block text-gray-700 dark:text-gray-300">
+									Seller GSTIN:
+									<select
+										name="sellerGST"
+										value={formData.sellerGST || "hgggg"}
+										onChange={handleChange}
+										className="mt-1 w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+										required>
+										<option value="hgggg">hgggg</option>
+									</select>
+								</label>
+								<label className="block text-gray-700 dark:text-gray-300">
+									Customer GSTIN:
+									<input
+										type="text"
+										name="customerGST"
+										value={formData.customerGST || ""}
+										onChange={handleChange}
+										className="mt-1 w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+										placeholder="Enter customer GSTIN (optional)"
+									/>
+								</label>
+							</div>
+						)}
+					</div>
 				</div>
 
 				{/* Additional Notes */}
@@ -434,10 +531,22 @@ const Form = () => {
 					<button
 						type="submit"
 						className="px-6 py-2 bg-blue-500 dark:bg-blue-600 text-white rounded-md hover:bg-blue-600 dark:hover:bg-blue-700 transition duration-300">
-						Create Invoice
+						Preview Invoice
 					</button>
 				</div>
 			</form>
+
+			{/* Invoice Preview Modal */}
+			{showPreview && (
+				<InvoiceGenerator
+					invoice={{
+						...formData,
+						id: `INV-${Date.now()}`,
+					}}
+					onClose={() => setShowPreview(false)}
+					onSave={handleSaveInvoice}
+				/>
+			)}
 		</div>
 	);
 };

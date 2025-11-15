@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useEffect } from "react";
 import { useReactToPrint } from "react-to-print";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
@@ -30,25 +30,55 @@ interface InvoiceData {
 	taxRate: number;
 	discount: number;
 	notes?: string;
+
+	// GST fields
+	sellerGST?: string;
+	customerGST?: string;
+	isGSTBill?: boolean;
 }
 
 interface InvoiceGeneratorProps {
 	invoice: InvoiceData;
 	onClose: () => void;
+	onSave?: () => void;
 }
 
 const InvoiceGenerator: React.FC<InvoiceGeneratorProps> = ({
 	invoice,
 	onClose,
+	onSave,
 }) => {
 	const invoiceRef = useRef<HTMLDivElement>(null);
+	const modalRef = useRef<HTMLDivElement>(null);
+
+	// Handle click outside modal to close
+	const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
+		if (modalRef.current && !modalRef.current.contains(e.target as Node)) {
+			onClose();
+		}
+	};
+
+	// Handle ESC key to close
+	useEffect(() => {
+		const handleEscape = (e: KeyboardEvent) => {
+			if (e.key === "Escape") {
+				onClose();
+			}
+		};
+
+		document.addEventListener("keydown", handleEscape);
+		return () => {
+			document.removeEventListener("keydown", handleEscape);
+		};
+	}, [onClose]);
+
+	// Extract and normalize values to ensure they're always defined
+	const price = Number(invoice.price) || 0;
+	const quantity = Number(invoice.quantity) || 0;
+	const taxRate = Number(invoice.taxRate) || 0;
+	const discount = Number(invoice.discount) || 0;
 
 	const calculateTotals = () => {
-		const price = Number(invoice.price) || 0;
-		const quantity = Number(invoice.quantity) || 0;
-		const taxRate = Number(invoice.taxRate) || 0;
-		const discount = Number(invoice.discount) || 0;
-
 		const subtotal = price * quantity;
 		const taxAmount = (subtotal * taxRate) / 100;
 		const total = subtotal + taxAmount - discount;
@@ -100,34 +130,49 @@ const InvoiceGenerator: React.FC<InvoiceGeneratorProps> = ({
 	};
 
 	return (
-		<div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-			<div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+		<div 
+			className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-99999 p-4"
+			onClick={handleBackdropClick}
+		>
+			<div 
+				ref={modalRef}
+				className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-5xl w-full max-h-[95vh] overflow-hidden flex flex-col"
+				onClick={(e) => e.stopPropagation()}
+			>
 				{/* Header */}
-				<div className="flex justify-between items-center p-6 border-b border-gray-200 dark:border-gray-700">
-					<h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+				<div className="flex justify-between items-center p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
+					<h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
 						Invoice Preview
 					</h2>
-					<div className="flex space-x-2">
+					<div className="flex flex-wrap gap-2">
+						{onSave && (
+							<button
+								onClick={onSave}
+								className="px-3 py-1.5 sm:px-4 sm:py-2 bg-green-500 text-white text-sm rounded-md hover:bg-green-600 transition duration-300">
+								Save Invoice
+							</button>
+						)}
 						<button
 							onClick={handlePrint}
-							className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition duration-300">
+							className="px-3 py-1.5 sm:px-4 sm:py-2 bg-blue-500 text-white text-sm rounded-md hover:bg-blue-600 transition duration-300">
 							Print
 						</button>
 						<button
 							onClick={handleDownloadPDF}
-							className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition duration-300">
+							className="px-3 py-1.5 sm:px-4 sm:py-2 bg-green-500 text-white text-sm rounded-md hover:bg-green-600 transition duration-300">
 							Download PDF
 						</button>
 						<button
 							onClick={onClose}
-							className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition duration-300">
+							className="px-3 py-1.5 sm:px-4 sm:py-2 bg-gray-500 text-white text-sm rounded-md hover:bg-gray-600 transition duration-300">
 							Close
 						</button>
 					</div>
 				</div>
 
-				{/* Invoice Content */}
-				<div ref={invoiceRef} className="p-8 bg-white">
+				{/* Invoice Content - Scrollable */}
+				<div className="overflow-y-auto flex-1">
+					<div ref={invoiceRef} className="p-4 sm:p-6 lg:p-8 bg-white">
 					{/* Company Header */}
 					<div className="text-center mb-8">
 						<h1 className="text-3xl font-bold text-gray-900 mb-2">
@@ -143,6 +188,11 @@ const InvoiceGenerator: React.FC<InvoiceGeneratorProps> = ({
 							Phone: +1 (555) 123-4567 | Email:
 							info@delucefood.com
 						</p>
+						{invoice.isGSTBill && invoice.sellerGST && (
+							<p className="text-gray-600 mt-2">
+								<strong>GSTIN:</strong> {invoice.sellerGST}
+							</p>
+						)}
 					</div>
 
 					{/* Invoice Details */}
@@ -204,6 +254,11 @@ const InvoiceGenerator: React.FC<InvoiceGeneratorProps> = ({
 								</p>
 								<p>Email: {invoice.buyerEmail || "N/A"}</p>
 								<p>Phone: {invoice.buyerPhone || "N/A"}</p>
+								{invoice.isGSTBill && invoice.customerGST && (
+									<p>
+										<strong>GSTIN:</strong> {invoice.customerGST}
+									</p>
+								)}
 							</div>
 						</div>
 					</div>
@@ -222,12 +277,32 @@ const InvoiceGenerator: React.FC<InvoiceGeneratorProps> = ({
 									<th className="border border-gray-300 px-4 py-2 text-left">
 										Description
 									</th>
+									{invoice.isGSTBill && (
+										<th className="border border-gray-300 px-4 py-2 text-center">
+											HSN/SAC
+										</th>
+									)}
 									<th className="border border-gray-300 px-4 py-2 text-center">
 										Quantity
 									</th>
 									<th className="border border-gray-300 px-4 py-2 text-right">
 										Price
 									</th>
+									{invoice.isGSTBill && (
+										<th className="border border-gray-300 px-4 py-2 text-right">
+											Taxable Value
+										</th>
+									)}
+									{invoice.isGSTBill && taxRate > 0 && (
+										<th className="border border-gray-300 px-4 py-2 text-right">
+											CGST ({taxRate / 2}%)
+										</th>
+									)}
+									{invoice.isGSTBill && taxRate > 0 && (
+										<th className="border border-gray-300 px-4 py-2 text-right">
+											SGST ({taxRate / 2}%)
+										</th>
+									)}
 									<th className="border border-gray-300 px-4 py-2 text-right">
 										Total
 									</th>
@@ -241,14 +316,34 @@ const InvoiceGenerator: React.FC<InvoiceGeneratorProps> = ({
 									<td className="border border-gray-300 px-4 py-2">
 										{invoice.description || "N/A"}
 									</td>
+									{invoice.isGSTBill && (
+										<td className="border border-gray-300 px-4 py-2 text-center">
+											-
+										</td>
+									)}
 									<td className="border border-gray-300 px-4 py-2 text-center">
 										{quantity}
 									</td>
 									<td className="border border-gray-300 px-4 py-2 text-right">
 										₹{price.toFixed(2)}
 									</td>
+									{invoice.isGSTBill && (
+										<td className="border border-gray-300 px-4 py-2 text-right">
+											₹{totals.subtotal.toFixed(2)}
+										</td>
+									)}
+									{invoice.isGSTBill && taxRate > 0 && (
+										<td className="border border-gray-300 px-4 py-2 text-right">
+											₹{(totals.taxAmount / 2).toFixed(2)}
+										</td>
+									)}
+									{invoice.isGSTBill && taxRate > 0 && (
+										<td className="border border-gray-300 px-4 py-2 text-right">
+											₹{(totals.taxAmount / 2).toFixed(2)}
+										</td>
+									)}
 									<td className="border border-gray-300 px-4 py-2 text-right">
-										₹{totals.subtotal.toFixed(2)}
+										₹{invoice.isGSTBill ? (totals.subtotal + totals.taxAmount).toFixed(2) : totals.subtotal.toFixed(2)}
 									</td>
 								</tr>
 							</tbody>
@@ -264,7 +359,35 @@ const InvoiceGenerator: React.FC<InvoiceGeneratorProps> = ({
 									₹{totals.subtotal.toFixed(2)}
 								</span>
 							</div>
-							{taxRate > 0 && (
+							{invoice.isGSTBill && taxRate > 0 && (
+								<>
+									<div className="flex justify-between py-2 border-b border-gray-200">
+										<span className="text-gray-600">
+											CGST ({taxRate / 2}%):
+										</span>
+										<span className="font-semibold">
+											₹{(totals.taxAmount / 2).toFixed(2)}
+										</span>
+									</div>
+									<div className="flex justify-between py-2 border-b border-gray-200">
+										<span className="text-gray-600">
+											SGST ({taxRate / 2}%):
+										</span>
+										<span className="font-semibold">
+											₹{(totals.taxAmount / 2).toFixed(2)}
+										</span>
+									</div>
+									<div className="flex justify-between py-2 border-b border-gray-200">
+										<span className="text-gray-600">
+											Total GST:
+										</span>
+										<span className="font-semibold">
+											₹{totals.taxAmount.toFixed(2)}
+										</span>
+									</div>
+								</>
+							)}
+							{!invoice.isGSTBill && taxRate > 0 && (
 								<div className="flex justify-between py-2 border-b border-gray-200">
 									<span className="text-gray-600">
 										Tax ({taxRate}%):
@@ -308,6 +431,7 @@ const InvoiceGenerator: React.FC<InvoiceGeneratorProps> = ({
 							For any queries, please contact us at
 							info@delucefood.com
 						</p>
+					</div>
 					</div>
 				</div>
 			</div>
