@@ -8,7 +8,6 @@ import {
 	updateDoc,
 	query,
 	orderBy,
-	where,
 } from "firebase/firestore";
 import db from "@/utils/firestore";
 import { Batch, Warehouse } from "@/types/inventory";
@@ -632,15 +631,14 @@ const BatchTracking: React.FC = () => {
 									</div>
 									{batch.expiryDate && (
 										<div
-											className={`text-sm ${
-												isExpired(batch.expiryDate)
+											className={`text-sm ${isExpired(batch.expiryDate)
 													? "text-red-600 dark:text-red-400"
 													: isExpiringSoon(
-															batch.expiryDate
-													  )
-													? "text-yellow-600 dark:text-yellow-400"
-													: "text-gray-500 dark:text-gray-400"
-											}`}>
+														batch.expiryDate
+													)
+														? "text-yellow-600 dark:text-yellow-400"
+														: "text-gray-500 dark:text-gray-400"
+												}`}>
 											Exp:{" "}
 											{new Date(
 												batch.expiryDate
@@ -661,15 +659,14 @@ const BatchTracking: React.FC = () => {
 													.value as Batch["status"]
 											)
 										}
-										className={`text-xs px-2 py-1 rounded-full border-0 ${
-											batch.status === "active"
+										className={`text-xs px-2 py-1 rounded-full border-0 ${batch.status === "active"
 												? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
 												: batch.status === "expired"
-												? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
-												: batch.status === "recalled"
-												? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
-												: "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200"
-										}`}>
+													? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
+													: batch.status === "recalled"
+														? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
+														: "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200"
+											}`}>
 										<option value="active">Active</option>
 										<option value="expired">Expired</option>
 										<option value="recalled">

@@ -40,7 +40,7 @@ const BarChart: React.FC = () => {
 			let labels = [];
 			let salesData = [];
 			let profitData = [];
-			let dateRanges = [];
+			const dateRanges = [];
 
 			console.log("Fetching chart data for period:", selectedPeriod);
 

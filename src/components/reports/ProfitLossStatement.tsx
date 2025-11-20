@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { collection, getDocs, query, where } from "firebase/firestore";
-import db from "@/utils/firestore";
 import { FinancialData, DateRange } from "@/types/financial";
 import {
 	financialCalculationService,
-	FinancialCalculations,
 } from "@/utils/financialCalculations";
 
 interface ProfitLossStatementProps {

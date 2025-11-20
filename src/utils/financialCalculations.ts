@@ -1,6 +1,7 @@
-import { collection, getDocs, query, where, orderBy } from "firebase/firestore";
+import { collection, getDocs, query, where } from "firebase/firestore";
 import db from "./firestore";
-import { FinancialData, DateRange } from "@/types/financial";
+import { DateRange, Expense } from "@/types/financial";
+import { Invoice, Product } from "@/types/invoice";
 
 export interface DashboardStats {
     totalRevenue: number;
@@ -130,7 +131,7 @@ export class FinancialCalculationService {
             const invoices = invoicesSnapshot.docs.map((doc) => ({
                 id: doc.id,
                 ...doc.data(),
-            }));
+            })) as Invoice[];
             console.log("Found invoices for financial data:", invoices.length, invoices);
 
             // Calculate revenue
@@ -149,7 +150,7 @@ export class FinancialCalculationService {
             const expenses = expensesSnapshot.docs.map((doc) => ({
                 id: doc.id,
                 ...doc.data(),
-            }));
+            })) as Expense[];
             console.log("Found expenses:", expenses.length, expenses);
 
             // Calculate operating expenses
@@ -162,7 +163,7 @@ export class FinancialCalculationService {
             const products = productsSnapshot.docs.map((doc) => ({
                 id: doc.id,
                 ...doc.data(),
-            }));
+            })) as Product[];
             console.log("Found products:", products.length, products);
 
             // Calculate inventory values
@@ -181,6 +182,7 @@ export class FinancialCalculationService {
                 totalRevenue,
                 accountsReceivable,
                 ...operatingExpenses,
+                inventoryValue,
                 ...inventoryCalculations,
                 cash,
                 beginningCash: cash * 0.8, // Simplified calculation
@@ -209,7 +211,7 @@ export class FinancialCalculationService {
         const invoices = invoicesSnapshot.docs.map((doc) => ({
             id: doc.id,
             ...doc.data(),
-        }));
+        })) as Invoice[];
         console.log("Found invoices:", invoices.length, invoices);
 
         // Get customers
@@ -241,7 +243,7 @@ export class FinancialCalculationService {
         };
     }
 
-    private calculateTotalRevenue(invoices: any[]): number {
+    private calculateTotalRevenue(invoices: Invoice[]): number {
         return invoices.reduce((sum, invoice) => {
             const price = Number(invoice.price) || 0;
             const quantity = Number(invoice.quantity) || 0;
@@ -254,7 +256,7 @@ export class FinancialCalculationService {
         }, 0);
     }
 
-    private calculateAccountsReceivable(invoices: any[]): number {
+    private calculateAccountsReceivable(invoices: Invoice[]): number {
         return invoices
             .filter((invoice) => invoice.paymentStatus !== "Paid")
             .reduce((sum, invoice) => {
@@ -269,7 +271,7 @@ export class FinancialCalculationService {
             }, 0);
     }
 
-    private calculateOperatingExpenses(expenses: any[]): {
+    private calculateOperatingExpenses(expenses: Expense[]): {
         totalOperatingExpenses: number;
         salaries: number;
         rent: number;
@@ -290,7 +292,7 @@ export class FinancialCalculationService {
         const utilities = expensesByCategory['Utilities'] || expensesByCategory['utilities'] || 0;
         const marketing = expensesByCategory['Marketing'] || expensesByCategory['marketing'] || 0;
         const depreciation = expensesByCategory['Depreciation'] || expensesByCategory['depreciation'] || 0;
-        const otherOperatingExpenses = Object.entries(expensesByCategory)
+        const otherOperatingExpenses = (Object.entries(expensesByCategory) as [string, number][])
             .filter(([category]) => !['Salaries', 'salaries', 'Rent', 'rent', 'Utilities', 'utilities', 'Marketing', 'marketing', 'Depreciation', 'depreciation'].includes(category))
             .reduce((sum, [, amount]) => sum + amount, 0);
 
@@ -307,7 +309,7 @@ export class FinancialCalculationService {
         };
     }
 
-    private calculateInventoryValue(products: any[]): number {
+    private calculateInventoryValue(products: Product[]): number {
         return products.reduce((sum, product) => {
             const price = Number(product.price) || 0;
             const stock = Number(product.stock) || 0;

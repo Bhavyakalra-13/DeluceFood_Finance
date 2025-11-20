@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { collection, getDocs, query, where, orderBy } from "firebase/firestore";
+import { collection, getDocs, query, where } from "firebase/firestore";
 import db from "@/utils/firestore";
 import { FinancialData, DateRange } from "@/types/financial";
 import {
-	financialCalculationService,
-	FinancialCalculations,
+	financialCalculationService
 } from "@/utils/financialCalculations";
 
 interface BalanceSheetProps {
@@ -480,12 +479,12 @@ const BalanceSheet: React.FC<BalanceSheetProps> = ({ dateRange }) => {
 					{/* Equity */}
 					<div className="mb-4">
 						<h4 className="text-lg font-medium text-gray-800 dark:text-gray-200 mb-2">
-							Owner's Equity
+							Owner&apos;s Equity
 						</h4>
 						<div className="space-y-2 ml-4">
 							<div className="flex justify-between">
 								<span className="text-gray-600 dark:text-gray-400">
-									Owner's Equity
+									Owner&apos;s Equity
 								</span>
 								<span className="font-medium">
 									₹

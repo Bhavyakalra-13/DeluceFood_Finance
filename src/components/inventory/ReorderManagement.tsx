@@ -8,7 +8,6 @@ import {
 	updateDoc,
 	query,
 	orderBy,
-	where,
 } from "firebase/firestore";
 import db from "@/utils/firestore";
 import { ReorderRequest, InventoryItem, Warehouse } from "@/types/inventory";
@@ -142,7 +141,7 @@ const ReorderManagement: React.FC = () => {
 		newStatus: ReorderRequest["status"]
 	) => {
 		try {
-			const updateData: any = {
+			const updateData: { status: ReorderRequest["status"]; updatedAt: string; approvedBy?: string; approvedAt?: string; orderedAt?: string; receivedAt?: string; } = {
 				status: newStatus,
 				updatedAt: new Date().toISOString(),
 			};

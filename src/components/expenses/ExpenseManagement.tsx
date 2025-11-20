@@ -11,7 +11,7 @@ import {
 	where,
 } from "firebase/firestore";
 import db from "@/utils/firestore";
-import { Expense, ExpenseCategory, Vendor, DateRange } from "@/types/financial";
+import { Expense, ExpenseCategory, Vendor } from "@/types/financial";
 
 const ExpenseManagement: React.FC = () => {
 	const [expenses, setExpenses] = useState<Expense[]>([]);

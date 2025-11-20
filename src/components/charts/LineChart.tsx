@@ -40,7 +40,7 @@ const LineChart: React.FC = () => {
 			let labels = [];
 			let revenueData = [];
 			let expensesData = [];
-			let dateRanges = [];
+			const dateRanges = [];
 
 			console.log("Fetching chart data for period:", selectedPeriod);
 

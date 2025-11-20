@@ -71,8 +71,8 @@ const Form = () => {
 		isGSTBill: false,
 	});
 
-	const [products, setProducts] = useState<any[]>([]);
-	const [customers, setCustomers] = useState<any[]>([]);
+	const [products, setProducts] = useState();
+	const [customers, setCustomers] = useState();
 	const [showPreview, setShowPreview] = useState(false);
 
 	useEffect(() => {

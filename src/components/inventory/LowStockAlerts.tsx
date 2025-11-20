@@ -8,7 +8,6 @@ import {
 	updateDoc,
 	query,
 	orderBy,
-	where,
 } from "firebase/firestore";
 import db from "@/utils/firestore";
 import { LowStockAlert, InventoryItem, Warehouse } from "@/types/inventory";
@@ -110,10 +109,10 @@ const LowStockAlerts: React.FC = () => {
 							item.currentStock === 0
 								? "critical"
 								: item.currentStock <= item.reorderPoint * 0.5
-								? "high"
-								: item.currentStock <= item.reorderPoint * 0.8
-								? "medium"
-								: "low";
+									? "high"
+									: item.currentStock <= item.reorderPoint * 0.8
+										? "medium"
+										: "low";
 
 						newAlerts.push({
 							productId: item.productId,
