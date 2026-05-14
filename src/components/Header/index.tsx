@@ -11,8 +11,8 @@ const Header = (props: {
 	const { user } = useAuth();
 
 	return (
-		<header className="sticky top-0 z-999 flex w-full bg-white drop-shadow-1 dark:bg-boxdark dark:drop-shadow-none text-black dark:text-bodydark">
-			<div className="flex flex-grow items-center justify-between px-4 py-4 shadow-2 md:px-6 2xl:px-11">
+		<header className="sticky top-0 z-999 flex w-full bg-white/80 backdrop-blur-xl border-b border-stroke/50 dark:bg-boxdark/80 dark:border-strokedark/50 text-black dark:text-bodydark">
+			<div className="flex flex-grow items-center justify-between px-4 py-4 md:px-6 2xl:px-11">
 				<div className="flex items-center gap-2 sm:gap-4 lg:hidden">
 					{/* <!-- Hamburger Toggle BTN --> */}
 					<button
@@ -21,7 +21,7 @@ const Header = (props: {
 							e.stopPropagation();
 							props.setSidebarOpen(!props.sidebarOpen);
 						}}
-						className="z-99999 block rounded-sm border border-stroke bg-white p-1.5 shadow-sm dark:border-strokedark dark:bg-boxdark lg:hidden">
+						className="z-99999 block rounded-xl border border-stroke bg-white p-1.5 shadow-sm dark:border-strokedark dark:bg-boxdark lg:hidden hover:bg-whiten dark:hover:bg-meta-4 transition-colors">
 						<span className="relative block h-5.5 w-5.5 cursor-pointer">
 							<span className="du-block absolute right-0 h-full w-full">
 								<span
@@ -55,16 +55,39 @@ const Header = (props: {
 					{/* <!-- Hamburger Toggle BTN --> */}
 
 					<Link className="block flex-shrink-0 lg:hidden" href="/">
-						<h1 className="flex items-center text-4xl font-extrabold text-black dark:text-white">
-							Financer
-							<span className="bg-blue-100 text-blue-800 text-xs font-semibold me-2 px-1.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-200 ms-2">
-								PRO
-							</span>
-						</h1>
+						<div className="flex items-center gap-2">
+							<div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
+								<svg className="w-4.5 h-4.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+									<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+								</svg>
+							</div>
+							<h1 className="text-xl font-bold text-black dark:text-white">
+								Financer
+							</h1>
+						</div>
 					</Link>
 				</div>
 
-				<div className="ml-auto flex items-center gap-3 2xsm:gap-7">
+				{/* Search bar - hidden on mobile */}
+				<div className="hidden md:block flex-1 max-w-md">
+					<div className="relative">
+						<div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+							<svg className="w-4 h-4 text-bodydark2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+								<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+							</svg>
+						</div>
+						<input
+							type="text"
+							placeholder="Search..."
+							className="w-full py-2 pl-10 pr-4 text-sm rounded-xl border border-stroke bg-gray-2 dark:bg-form-input dark:border-strokedark text-black dark:text-white placeholder:text-bodydark2 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all"
+						/>
+						<div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+							<span className="text-xs text-bodydark2 bg-white dark:bg-meta-4 border border-stroke dark:border-strokedark px-1.5 py-0.5 rounded font-mono">⌘K</span>
+						</div>
+					</div>
+				</div>
+
+				<div className="ml-auto flex items-center gap-3 2xsm:gap-4">
 					<ul className="flex items-center gap-2 2xsm:gap-4">
 						<DarkModeSwitcher />
 						{user?.email && <DropdownNotification />}

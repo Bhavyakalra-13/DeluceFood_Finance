@@ -89,10 +89,18 @@ const ProductDemandChart: React.FC = () => {
 				where("invoiceDate", "<=", endDate)
 			);
 			const invoicesSnapshot = await getDocs(invoicesQuery);
-			const invoices = invoicesSnapshot.docs.map((doc) => ({
-				id: doc.id,
-				...doc.data(),
-			}));
+			const invoices = invoicesSnapshot.docs.map((doc) => {
+				const data = doc.data() as Record<string, unknown>;
+				return {
+					id: doc.id,
+					...data,
+					product: data.product as string,
+					quantity: data.quantity as number | string,
+					price: data.price as number | string,
+					taxRate: data.taxRate as number | string,
+					discount: data.discount as number | string,
+				};
+			});
 
 			// Group by product and calculate totals
 			const productMap = new Map<

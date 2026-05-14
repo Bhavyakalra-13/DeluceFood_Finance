@@ -8,13 +8,17 @@ interface SidebarItemProps {
   item: SidebarMenuItem;
   pageName: string;
   setPageName: (pageName: string) => void;
+  setSidebarOpen?: (arg: boolean) => void;
 }
 
-const SidebarItem = ({ item, pageName, setPageName }: SidebarItemProps) => {
+const SidebarItem = ({ item, pageName, setPageName, setSidebarOpen }: SidebarItemProps) => {
   const handleClick = () => {
     const updatedPageName =
       pageName !== item.label.toLowerCase() ? item.label.toLowerCase() : "";
-    return setPageName(updatedPageName);
+    setPageName(updatedPageName);
+    if (!item.children && setSidebarOpen) {
+      setSidebarOpen(false);
+    }
   };
 
   const pathname = usePathname();
@@ -63,7 +67,7 @@ const SidebarItem = ({ item, pageName, setPageName }: SidebarItemProps) => {
           className={`translate transform overflow-hidden ${pageName !== item.label.toLowerCase() && "hidden"
             }`}
         >
-          <SidebarDropdown item={item.children} />
+          <SidebarDropdown item={item.children} setSidebarOpen={setSidebarOpen} />
         </div>
       )}
     </li>

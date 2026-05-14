@@ -147,20 +147,33 @@ const LineChart: React.FC = () => {
 			// Fetch all invoices and expenses first
 			const allInvoicesQuery = query(collection(db, "invoices"));
 			const allInvoicesSnapshot = await getDocs(allInvoicesQuery);
-			const allInvoices = allInvoicesSnapshot.docs.map((doc) => ({
-				id: doc.id,
-				...doc.data(),
-			}));
+			const allInvoices = allInvoicesSnapshot.docs.map((doc) => {
+				const data = doc.data() as Record<string, unknown>;
+				return {
+					id: doc.id,
+					...data,
+					invoiceDate: data.invoiceDate as string,
+					price: data.price as number | string,
+					quantity: data.quantity as number | string,
+					taxRate: data.taxRate as number | string,
+					discount: data.discount as number | string,
+				};
+			});
 
 			const allExpensesQuery = query(
 				collection(db, "expenses"),
 				where("status", "==", "approved")
 			);
 			const allExpensesSnapshot = await getDocs(allExpensesQuery);
-			const allExpenses = allExpensesSnapshot.docs.map((doc) => ({
-				id: doc.id,
-				...doc.data(),
-			}));
+			const allExpenses = allExpensesSnapshot.docs.map((doc) => {
+				const data = doc.data() as Record<string, unknown>;
+				return {
+					id: doc.id,
+					...data,
+					date: data.date as string,
+					amount: data.amount as number | string,
+				};
+			});
 
 			console.log("All invoices:", allInvoices.length);
 			console.log("All expenses:", allExpenses.length);

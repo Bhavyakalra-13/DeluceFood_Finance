@@ -273,17 +273,26 @@ const ProductManagement: React.FC = () => {
 												})
 											}
 											className="w-full p-2 border border-stroke rounded-md bg-white text-black dark:bg-form-input dark:border-form-strokedark dark:text-white">
-											<option value="pcs">Pieces</option>
-											<option value="kg">
-												Kilograms
-											</option>
-											<option value="g">Grams</option>
-											<option value="l">Liters</option>
-											<option value="ml">
-												Milliliters
-											</option>
-											<option value="box">Box</option>
-											<option value="pack">Pack</option>
+											<optgroup label="Standard">
+												<option value="pcs">Pieces</option>
+												<option value="kg">Kilograms</option>
+												<option value="g">Grams</option>
+												<option value="l">Liters</option>
+												<option value="ml">Milliliters</option>
+												<option value="box">Box</option>
+												<option value="pack">Pack</option>
+											</optgroup>
+											<optgroup label="Bags">
+												<option value="bag_5kg">Bag (5kg)</option>
+												<option value="bag_10kg">Bag (10kg)</option>
+												<option value="bag_20kg">Bag (20kg)</option>
+											</optgroup>
+											<optgroup label="Cartons">
+												<option value="carton_12">Carton (12 units)</option>
+												<option value="carton_24">Carton (24 units)</option>
+												<option value="carton_36">Carton (36 units)</option>
+												<option value="carton_48">Carton (48 units)</option>
+											</optgroup>
 										</select>
 									</div>
 									<div>
@@ -349,7 +358,7 @@ const ProductManagement: React.FC = () => {
 			)}
 
 			{/* Products Table */}
-			<div className="bg-white dark:bg-boxdark rounded-lg shadow overflow-hidden border border-stroke dark:border-strokedark">
+			<div className="bg-white dark:bg-boxdark rounded-lg shadow overflow-hidden overflow-x-auto border border-stroke dark:border-strokedark">
 				<table className="min-w-full divide-y divide-stroke dark:divide-strokedark">
 					<thead className="bg-gray-2 dark:bg-meta-4">
 						<tr>

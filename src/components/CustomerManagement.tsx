@@ -350,7 +350,7 @@ const CustomerManagement: React.FC = () => {
 			)}
 
 			{/* Customers Table */}
-			<div className="bg-white dark:bg-boxdark rounded-lg shadow overflow-hidden border border-stroke dark:border-strokedark">
+			<div className="bg-white dark:bg-boxdark rounded-lg shadow overflow-hidden overflow-x-auto border border-stroke dark:border-strokedark">
 				<table className="min-w-full divide-y divide-stroke dark:divide-strokedark">
 					<thead className="bg-gray-2 dark:bg-meta-4">
 						<tr>

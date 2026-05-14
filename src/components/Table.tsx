@@ -1,7 +1,8 @@
 import db from "@/utils/firestore";
 import { collection, deleteDoc, doc, getDocs } from "firebase/firestore";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import InvoiceGenerator from "./InvoiceGenerator";
+import ConfirmDialog from "./ConfirmDialog";
 
 type Invoice = {
 	id: string;
@@ -32,232 +33,374 @@ type Invoice = {
 	notes?: string;
 };
 
+type SortField = "invoiceNumber" | "buyerName" | "product" | "total" | "invoiceDate" | "paymentStatus";
+type SortDir = "asc" | "desc";
+
 const Table = () => {
 	const [invoices, setInvoices] = useState<Invoice[]>([]);
 	const [loading, setLoading] = useState<boolean>(true);
-	const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(
-		null
-	);
+	const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
+	
+	// Search & Filter
+	const [searchQuery, setSearchQuery] = useState("");
+	const [statusFilter, setStatusFilter] = useState<string>("all");
+	
+	// Sorting
+	const [sortField, setSortField] = useState<SortField>("invoiceDate");
+	const [sortDir, setSortDir] = useState<SortDir>("desc");
+	
+	// Pagination
+	const [currentPage, setCurrentPage] = useState(1);
+	const [perPage, setPerPage] = useState(10);
+	
+	// Delete confirmation
+	const [deleteTarget, setDeleteTarget] = useState<Invoice | null>(null);
 
 	useEffect(() => {
-		// Fetch data from Firestore
-		const fetchData = async () => {
-			try {
-				const querySnapshot = await getDocs(collection(db, "invoices"));
-				const data = querySnapshot.docs.map((doc) => ({
-					id: doc.id,
-					...doc.data(),
-				})) as Invoice[];
-				setInvoices(data);
-				setLoading(false);
-			} catch (error) {
-				console.error("Error fetching Firestore data: ", error);
-				setLoading(false);
-			}
-		};
-
 		fetchData();
 	}, []);
 
+	const fetchData = async () => {
+		try {
+			const querySnapshot = await getDocs(collection(db, "invoices"));
+			const data = querySnapshot.docs.map((doc) => ({
+				id: doc.id,
+				...doc.data(),
+			})) as Invoice[];
+			setInvoices(data);
+			setLoading(false);
+		} catch (error) {
+			console.error("Error fetching Firestore data: ", error);
+			setLoading(false);
+		}
+	};
+
 	const handleDelete = async (id: string) => {
 		try {
-			// Reference to the document to delete
 			const docRef = doc(db, "invoices", id);
 			await deleteDoc(docRef);
-			console.log(`Document with ID ${id} deleted`);
-			// Optionally, you can refetch the data to update the UI after deletion
+			setInvoices((prev) => prev.filter((inv) => inv.id !== id));
+			setDeleteTarget(null);
 		} catch (error) {
 			console.error("Error deleting document: ", error);
 		}
 	};
 
+	const getTotal = (inv: Invoice) => {
+		const price = Number(inv.price) || 0;
+		const quantity = Number(inv.quantity) || 0;
+		const taxRate = Number(inv.taxRate) || 0;
+		const discount = Number(inv.discount) || 0;
+		const subtotal = price * quantity;
+		const taxAmount = (subtotal * taxRate) / 100;
+		return subtotal + taxAmount - discount;
+	};
+
+	// Filter + Search + Sort
+	const processedInvoices = useMemo(() => {
+		let result = [...invoices];
+
+		// Status filter
+		if (statusFilter !== "all") {
+			result = result.filter((inv) => inv.paymentStatus === statusFilter);
+		}
+
+		// Search
+		if (searchQuery) {
+			const q = searchQuery.toLowerCase();
+			result = result.filter(
+				(inv) =>
+					inv.invoiceNumber?.toLowerCase().includes(q) ||
+					inv.buyerName?.toLowerCase().includes(q) ||
+					inv.product?.toLowerCase().includes(q) ||
+					inv.buyerEmail?.toLowerCase().includes(q)
+			);
+		}
+
+		// Sort
+		result.sort((a, b) => {
+			let aVal: string | number = "";
+			let bVal: string | number = "";
+
+			switch (sortField) {
+				case "total":
+					aVal = getTotal(a);
+					bVal = getTotal(b);
+					break;
+				case "invoiceDate":
+					aVal = a.invoiceDate || "";
+					bVal = b.invoiceDate || "";
+					break;
+				default:
+					aVal = (a[sortField] || "").toString().toLowerCase();
+					bVal = (b[sortField] || "").toString().toLowerCase();
+			}
+
+			if (aVal < bVal) return sortDir === "asc" ? -1 : 1;
+			if (aVal > bVal) return sortDir === "asc" ? 1 : -1;
+			return 0;
+		});
+
+		return result;
+	}, [invoices, searchQuery, statusFilter, sortField, sortDir]);
+
+	// Pagination
+	const totalPages = Math.ceil(processedInvoices.length / perPage);
+	const paginatedInvoices = processedInvoices.slice(
+		(currentPage - 1) * perPage,
+		currentPage * perPage
+	);
+
+	const handleSort = (field: SortField) => {
+		if (sortField === field) {
+			setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+		} else {
+			setSortField(field);
+			setSortDir("asc");
+		}
+	};
+
+	const SortIcon = ({ field }: { field: SortField }) => (
+		<span className="inline-flex ml-1">
+			{sortField === field ? (
+				sortDir === "asc" ? (
+					<svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 15l7-7 7 7" /></svg>
+				) : (
+					<svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 9l-7 7-7-7" /></svg>
+				)
+			) : (
+				<svg className="w-3 h-3 opacity-30" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" /></svg>
+			)}
+		</span>
+	);
+
+	const statusBadge = (status: string) => {
+		const styles: Record<string, string> = {
+			Paid: "badge-success",
+			Overdue: "badge-danger",
+			Sent: "badge-warning",
+		};
+		return styles[status] || "badge-neutral";
+	};
+
 	if (loading) {
-		return <p className="text-black dark:text-white">Loading...</p>;
+		return (
+			<div className="glass-card p-6">
+				<div className="flex items-center justify-between mb-6">
+					<div className="skeleton w-48 h-10 rounded-xl" />
+					<div className="skeleton w-32 h-10 rounded-xl" />
+				</div>
+				{[...Array(5)].map((_, i) => (
+					<div key={i} className="flex gap-4 mb-4">
+						<div className="skeleton flex-1 h-12 rounded-lg" />
+					</div>
+				))}
+			</div>
+		);
 	}
 
 	return (
-		<div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
-			<div className="max-w-full overflow-x-auto">
-				<table className="w-full table-auto">
-					<thead>
-						<tr className="bg-gray-2 text-left dark:bg-meta-4">
-							<th className="min-w-[200px] px-4 py-4 font-medium text-black dark:text-white xl:pl-11">
-								Invoice #
-							</th>
-							<th className="min-w-[200px] px-4 py-4 font-medium text-black dark:text-white">
-								Buyer Details
-							</th>
-							<th className="min-w-[150px] px-4 py-4 font-medium text-black dark:text-white">
-								Product
-							</th>
-							<th className="min-w-[100px] px-4 py-4 font-medium text-black dark:text-white">
-								Qty
-							</th>
-							<th className="min-w-[100px] px-4 py-4 font-medium text-black dark:text-white">
-								Price
-							</th>
-							<th className="min-w-[120px] px-4 py-4 font-medium text-black dark:text-white">
-								Total
-							</th>
-							<th className="min-w-[100px] px-4 py-4 font-medium text-black dark:text-white">
-								Status
-							</th>
-							<th className="min-w-[100px] px-4 py-4 font-medium text-black dark:text-white">
-								Date
-							</th>
-							<th className="px-4 py-4 font-medium text-black dark:text-white">
-								Actions
-							</th>
-						</tr>
-					</thead>
-					<tbody>
-						{invoices.map((invoice, key) => {
-							// Safe defaults for all numeric values
-							const price = Number(invoice.price) || 0;
-							const quantity = Number(invoice.quantity) || 0;
-							const taxRate = Number(invoice.taxRate) || 0;
-							const discount = Number(invoice.discount) || 0;
-							
-							const subtotal = price * quantity;
-							const taxAmount = (subtotal * taxRate) / 100;
-							const total = subtotal + taxAmount - discount;
+		<div className="glass-card overflow-hidden overflow-x-auto">
+			{/* Toolbar */}
+			<div className="p-5 border-b border-stroke dark:border-strokedark">
+				<div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+					{/* Search */}
+					<div className="relative flex-1 max-w-md">
+						<div className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none">
+							<svg className="w-4 h-4 text-bodydark2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+								<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+							</svg>
+						</div>
+						<input
+							type="text"
+							placeholder="Search invoices..."
+							value={searchQuery}
+							onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
+							className="input-modern pl-10 py-2.5 text-sm"
+						/>
+					</div>
 
-							return (
-								<tr key={key}>
-									<td className="border-b border-stroke px-4 py-5 pl-9 dark:border-strokedark xl:pl-11">
-										<h5 className="font-medium text-black dark:text-white">
-											{invoice.invoiceNumber || 'N/A'}
-										</h5>
-									</td>
-									<td className="border-b border-stroke px-4 py-5 dark:border-strokedark">
-										<div>
-											<h5 className="font-medium text-black dark:text-white">
-												{invoice.buyerName || 'N/A'}
-											</h5>
-											<p className="text-sm text-body dark:text-bodydark">
-												{invoice.buyerEmail || 'N/A'}
-											</p>
-											<p className="text-sm text-body dark:text-bodydark">
-												{invoice.buyerPhone || 'N/A'}
-											</p>
-										</div>
-									</td>
-									<td className="border-b border-stroke px-4 py-5 dark:border-strokedark">
-										<h5 className="font-medium text-black dark:text-white">
-											{invoice.product || 'N/A'}
-										</h5>
-										{invoice.description && (
-											<p className="text-sm text-body dark:text-bodydark">
-												{invoice.description.substring(
-													0,
-													50
-												)}
-												...
-											</p>
-										)}
-									</td>
-									<td className="border-b border-stroke px-4 py-5 dark:border-strokedark">
-										<p className="text-black dark:text-white">
-											{quantity}
-										</p>
-									</td>
-									<td className="border-b border-stroke px-4 py-5 dark:border-strokedark">
-										<p className="text-black dark:text-white">
-											₹{price.toFixed(2)}
-										</p>
-									</td>
-									<td className="border-b border-stroke px-4 py-5 dark:border-strokedark">
-										<p className="font-medium text-black dark:text-white">
-											₹{total.toFixed(2)}
-										</p>
-									</td>
-									<td className="border-b border-stroke px-4 py-5 dark:border-strokedark">
-										<p
-											className={`inline-flex rounded-full bg-opacity-10 px-3 py-1 text-sm font-medium ${
-												invoice.paymentStatus === "Paid"
-													? "bg-success text-success"
-													: invoice.paymentStatus ===
-													  "Overdue"
-													? "bg-danger text-danger"
-													: invoice.paymentStatus ===
-													  "Sent"
-													? "bg-warning text-warning"
-													: "bg-body text-body dark:bg-bodydark dark:text-bodydark"
-											}`}>
-											{invoice.paymentStatus || 'Draft'}
-										</p>
-									</td>
-									<td className="border-b border-stroke px-4 py-5 dark:border-strokedark">
-										<p className="text-black dark:text-white">
-											{invoice.invoiceDate ? new Date(invoice.invoiceDate).toLocaleDateString() : 'N/A'}
-										</p>
-									</td>
-									<td className="border-b border-stroke px-4 py-5 dark:border-strokedark">
-										<div className="flex items-center space-x-3.5">
-											<button
-												onClick={() =>
-													invoice.id && handleDelete(invoice.id)
-												}
-												className="hover:text-primary"
-												title="Delete Invoice"
-												disabled={!invoice.id}>
-												<svg
-													className="fill-current"
-													width="18"
-													height="18"
-													viewBox="0 0 18 18"
-													fill="none"
-													xmlns="http://www.w3.org/2000/svg">
-													<path
-														d="M13.7535 2.47502H11.5879V1.9969C11.5879 1.15315 10.9129 0.478149 10.0691 0.478149H7.90352C7.05977 0.478149 6.38477 1.15315 6.38477 1.9969V2.47502H4.21914C3.40352 2.47502 2.72852 3.15002 2.72852 3.96565V4.8094C2.72852 5.42815 3.09414 5.9344 3.62852 6.1594L4.07852 15.4688C4.13477 16.6219 5.09102 17.5219 6.24414 17.5219H11.7004C12.8535 17.5219 13.8098 16.6219 13.866 15.4688L14.3441 6.13127C14.8785 5.90627 15.2441 5.3719 15.2441 4.78127V3.93752C15.2441 3.15002 14.5691 2.47502 13.7535 2.47502ZM7.67852 1.9969C7.67852 1.85627 7.79102 1.74377 7.93164 1.74377H10.0973C10.2379 1.74377 10.3504 1.85627 10.3504 1.9969V2.47502H7.70664V1.9969H7.67852ZM4.02227 3.96565C4.02227 3.85315 4.10664 3.74065 4.24727 3.74065H13.7535C13.866 3.74065 13.9785 3.82502 13.9785 3.96565V4.8094C13.9785 4.9219 13.8941 5.0344 13.7535 5.0344H4.24727C4.13477 5.0344 4.02227 4.95002 4.02227 4.8094V3.96565ZM11.7285 16.2563H6.27227C5.79414 16.2563 5.40039 15.8906 5.37227 15.3844L4.95039 6.2719H13.0785L12.6566 15.3844C12.6004 15.8625 12.2066 16.2563 11.7285 16.2563Z"
-														fill=""
-													/>
-													<path
-														d="M9.00039 9.11255C8.66289 9.11255 8.35352 9.3938 8.35352 9.75942V13.3313C8.35352 13.6688 8.63477 13.9782 9.00039 13.9782C9.33789 13.9782 9.64727 13.6969 9.64727 13.3313V9.75942C9.64727 9.3938 9.33789 9.11255 9.00039 9.11255Z"
-														fill=""
-													/>
-													<path
-														d="M11.2502 9.67504C10.8846 9.64692 10.6033 9.90004 10.5752 10.2657L10.4064 12.7407C10.3783 13.0782 10.6314 13.3875 10.9971 13.4157C11.0252 13.4157 11.0252 13.4157 11.0533 13.4157C11.3908 13.4157 11.6721 13.1625 11.6721 12.825L11.8408 10.35C11.8408 9.98442 11.5877 9.70317 11.2502 9.67504Z"
-														fill=""
-													/>
-													<path
-														d="M6.72245 9.67504C6.38495 9.70317 6.1037 10.0125 6.13182 10.35L6.3287 12.825C6.35683 13.1625 6.63808 13.4157 6.94745 13.4157C6.97558 13.4157 6.97558 13.4157 7.0037 13.4157C7.3412 13.3875 7.62245 13.0782 7.59433 12.7407L7.39745 10.2657C7.39745 9.90004 7.08808 9.64692 6.72245 9.67504Z"
-														fill=""
-													/>
-												</svg>
-											</button>
-											<button
-												onClick={() =>
-													setSelectedInvoice(invoice)
-												}
-												className="hover:text-primary"
-												title="View/Print Invoice"
-												disabled={!invoice.id}>
-												<svg
-													className="fill-current"
-													width="18"
-													height="18"
-													viewBox="0 0 18 18"
-													fill="none"
-													xmlns="http://www.w3.org/2000/svg">
-													<path
-														d="M16.8754 11.6719C16.5379 11.6719 16.2285 11.9531 16.2285 12.3187V14.8219C16.2285 15.075 16.0316 15.2719 15.7785 15.2719H2.22227C1.96914 15.2719 1.77227 15.075 1.77227 14.8219V12.3187C1.77227 11.9812 1.49102 11.6719 1.12539 11.6719C0.759766 11.6719 0.478516 11.9531 0.478516 12.3187V14.8219C0.478516 15.7781 1.23789 16.5375 2.19414 16.5375H15.7785C16.7348 16.5375 17.4941 15.7781 17.4941 14.8219V12.3187C17.5223 11.9531 17.2129 11.6719 16.8754 11.6719Z"
-														fill=""
-													/>
-													<path
-														d="M8.55074 12.3469C8.66324 12.4594 8.83199 12.5156 9.00074 12.5156C9.16949 12.5156 9.31012 12.4594 9.45074 12.3469L13.4726 8.43752C13.7257 8.1844 13.7257 7.79065 13.5007 7.53752C13.2476 7.2844 12.8539 7.2844 12.6007 7.5094L9.64762 10.4063V2.1094C9.64762 1.7719 9.36637 1.46252 9.00074 1.46252C8.66324 1.46252 8.35387 1.74377 8.35387 2.1094V10.4063L5.40074 7.53752C5.14762 7.2844 4.75387 7.31252 4.50074 7.53752C4.24762 7.79065 4.27574 8.1844 4.50074 8.43752L8.55074 12.3469Z"
-														fill=""
-													/>
-												</svg>
-											</button>
-										</div>
-									</td>
-								</tr>
-							);
-						})}
-					</tbody>
-				</table>
+					{/* Filters */}
+					<div className="flex gap-2 items-center">
+						<select
+							value={statusFilter}
+							onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1); }}
+							className="input-modern py-2.5 text-sm w-auto pr-8"
+						>
+							<option value="all">All Status</option>
+							<option value="Paid">Paid</option>
+							<option value="Sent">Pending</option>
+							<option value="Overdue">Overdue</option>
+							<option value="Draft">Draft</option>
+						</select>
+						
+						<span className="text-sm text-body dark:text-bodydark whitespace-nowrap">
+							{processedInvoices.length} invoice{processedInvoices.length !== 1 ? 's' : ''}
+						</span>
+					</div>
+				</div>
 			</div>
+
+			{/* Table */}
+			<div className="overflow-x-auto">
+				{paginatedInvoices.length === 0 ? (
+					/* Empty State */
+					<div className="py-16 text-center">
+						<div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray dark:bg-meta-4 flex items-center justify-center">
+							<svg className="w-8 h-8 text-bodydark2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+								<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+							</svg>
+						</div>
+						<h3 className="text-lg font-semibold text-black dark:text-white mb-1">No invoices found</h3>
+						<p className="text-sm text-body dark:text-bodydark">
+							{searchQuery || statusFilter !== "all" ? "Try adjusting your search or filters" : "Create your first invoice to get started"}
+						</p>
+					</div>
+				) : (
+					<table className="table-modern">
+						<thead>
+							<tr>
+								<th className="pl-6 cursor-pointer select-none hover:text-black dark:hover:text-white transition-colors" onClick={() => handleSort("invoiceNumber")}>
+									Invoice # <SortIcon field="invoiceNumber" />
+								</th>
+								<th className="cursor-pointer select-none hover:text-black dark:hover:text-white transition-colors" onClick={() => handleSort("buyerName")}>
+									Customer <SortIcon field="buyerName" />
+								</th>
+								<th className="cursor-pointer select-none hover:text-black dark:hover:text-white transition-colors" onClick={() => handleSort("product")}>
+									Product <SortIcon field="product" />
+								</th>
+								<th className="text-right cursor-pointer select-none hover:text-black dark:hover:text-white transition-colors" onClick={() => handleSort("total")}>
+									Amount <SortIcon field="total" />
+								</th>
+								<th className="cursor-pointer select-none hover:text-black dark:hover:text-white transition-colors" onClick={() => handleSort("paymentStatus")}>
+									Status <SortIcon field="paymentStatus" />
+								</th>
+								<th className="cursor-pointer select-none hover:text-black dark:hover:text-white transition-colors" onClick={() => handleSort("invoiceDate")}>
+									Date <SortIcon field="invoiceDate" />
+								</th>
+								<th className="text-right pr-6">Actions</th>
+							</tr>
+						</thead>
+						<tbody>
+							{paginatedInvoices.map((invoice) => {
+								const total = getTotal(invoice);
+								return (
+									<tr key={invoice.id}>
+										<td className="pl-6">
+											<span className="font-semibold text-black dark:text-white">
+												{invoice.invoiceNumber || "N/A"}
+											</span>
+										</td>
+										<td>
+											<div>
+												<p className="font-medium text-black dark:text-white">{invoice.buyerName || "N/A"}</p>
+												<p className="text-xs text-body dark:text-bodydark mt-0.5">{invoice.buyerEmail || ""}</p>
+											</div>
+										</td>
+										<td>
+											<p className="text-black dark:text-white">{invoice.product || "N/A"}</p>
+										</td>
+										<td className="text-right">
+											<span className="font-semibold text-black dark:text-white tabular-nums">
+												₹{total.toFixed(2)}
+											</span>
+										</td>
+										<td>
+											<span className={statusBadge(invoice.paymentStatus)}>
+												{invoice.paymentStatus || "Draft"}
+											</span>
+										</td>
+										<td>
+											<span className="text-body dark:text-bodydark">
+												{invoice.invoiceDate ? new Date(invoice.invoiceDate).toLocaleDateString() : "N/A"}
+											</span>
+										</td>
+										<td className="text-right pr-6">
+											<div className="flex items-center justify-end gap-2">
+												<button
+													onClick={() => setSelectedInvoice(invoice)}
+													className="w-8 h-8 rounded-lg flex items-center justify-center text-body hover:text-primary hover:bg-primary/10 dark:text-bodydark dark:hover:text-primary transition-all"
+													title="View Invoice"
+												>
+													<svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+														<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+														<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+													</svg>
+												</button>
+												<button
+													onClick={() => setDeleteTarget(invoice)}
+													className="w-8 h-8 rounded-lg flex items-center justify-center text-body hover:text-red-500 hover:bg-red-50 dark:text-bodydark dark:hover:text-red-400 dark:hover:bg-red-900/20 transition-all"
+													title="Delete Invoice"
+												>
+													<svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+														<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+													</svg>
+												</button>
+											</div>
+										</td>
+									</tr>
+								);
+							})}
+						</tbody>
+					</table>
+				)}
+			</div>
+
+			{/* Pagination */}
+			{totalPages > 1 && (
+				<div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-5 border-t border-stroke dark:border-strokedark">
+					<div className="flex items-center gap-2 text-sm text-body dark:text-bodydark">
+						<span>Rows per page:</span>
+						<select
+							value={perPage}
+							onChange={(e) => { setPerPage(Number(e.target.value)); setCurrentPage(1); }}
+							className="input-modern py-1 px-2 text-sm w-auto"
+						>
+							{[10, 25, 50].map((n) => (
+								<option key={n} value={n}>{n}</option>
+							))}
+						</select>
+						<span className="ml-2">
+							{((currentPage - 1) * perPage) + 1}–{Math.min(currentPage * perPage, processedInvoices.length)} of {processedInvoices.length}
+						</span>
+					</div>
+					<div className="flex gap-1">
+						<button
+							onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+							disabled={currentPage === 1}
+							className="w-9 h-9 rounded-lg flex items-center justify-center text-body hover:bg-gray dark:text-bodydark dark:hover:bg-meta-4 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+						>
+							<svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+						</button>
+						{Array.from({ length: totalPages }, (_, i) => i + 1)
+							.filter((p) => p === 1 || p === totalPages || Math.abs(p - currentPage) <= 1)
+							.map((page, idx, arr) => (
+								<React.Fragment key={page}>
+									{idx > 0 && arr[idx - 1] !== page - 1 && (
+										<span className="w-9 h-9 flex items-center justify-center text-body dark:text-bodydark text-sm">…</span>
+									)}
+									<button
+										onClick={() => setCurrentPage(page)}
+										className={`w-9 h-9 rounded-lg flex items-center justify-center text-sm font-medium transition-all ${
+											currentPage === page
+												? "bg-gradient-primary text-white shadow-sm"
+												: "text-body dark:text-bodydark hover:bg-gray dark:hover:bg-meta-4"
+										}`}
+									>
+										{page}
+									</button>
+								</React.Fragment>
+							))}
+						<button
+							onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+							disabled={currentPage === totalPages}
+							className="w-9 h-9 rounded-lg flex items-center justify-center text-body hover:bg-gray dark:text-bodydark dark:hover:bg-meta-4 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+						>
+							<svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+						</button>
+					</div>
+				</div>
+			)}
 
 			{/* Invoice Generator Modal */}
 			{selectedInvoice && (
@@ -266,6 +409,17 @@ const Table = () => {
 					onClose={() => setSelectedInvoice(null)}
 				/>
 			)}
+
+			{/* Delete Confirmation */}
+			<ConfirmDialog
+				isOpen={!!deleteTarget}
+				title="Delete Invoice"
+				message={`Are you sure you want to delete invoice ${deleteTarget?.invoiceNumber || ''}? This action cannot be undone.`}
+				confirmLabel="Delete"
+				variant="danger"
+				onConfirm={() => deleteTarget?.id && handleDelete(deleteTarget.id)}
+				onCancel={() => setDeleteTarget(null)}
+			/>
 		</div>
 	);
 };

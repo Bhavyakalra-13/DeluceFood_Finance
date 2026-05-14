@@ -46,10 +46,14 @@ const BalanceSheet: React.FC<BalanceSheetProps> = ({ dateRange }) => {
 				where("status", "==", "approved")
 			);
 			const expensesSnapshot = await getDocs(expensesQuery);
-			const expenses = expensesSnapshot.docs.map((doc) => ({
-				id: doc.id,
-				...doc.data(),
-			}));
+			const expenses = expensesSnapshot.docs.map((doc) => {
+				const data = doc.data() as Record<string, unknown>;
+				return {
+					id: doc.id,
+					...data,
+					amount: data.amount as string | number,
+				};
+			});
 
 			const accountsPayable =
 				expenses.reduce((sum, expense) => {

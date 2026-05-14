@@ -94,7 +94,7 @@ const InvoiceGenerator: React.FC<InvoiceGeneratorProps> = ({
 	const totals = calculateTotals();
 
 	const handlePrint = useReactToPrint({
-		content: () => invoiceRef.current,
+		contentRef: invoiceRef,
 		documentTitle: `Invoice-${invoice.invoiceNumber}`,
 	});
 
@@ -136,7 +136,7 @@ const InvoiceGenerator: React.FC<InvoiceGeneratorProps> = ({
 		>
 			<div 
 				ref={modalRef}
-				className="bg-white dark:bg-boxdark rounded-lg shadow-xl max-w-5xl w-full max-h-[95vh] overflow-hidden flex flex-col border border-stroke dark:border-strokedark"
+				className="bg-white dark:bg-boxdark rounded-lg shadow-xl max-w-5xl w-full max-h-[95vh] overflow-hidden overflow-x-auto flex flex-col border border-stroke dark:border-strokedark"
 				onClick={(e) => e.stopPropagation()}
 			>
 				{/* Header */}

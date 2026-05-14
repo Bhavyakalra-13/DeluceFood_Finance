@@ -9,9 +9,10 @@ interface DropdownItem {
 
 interface SidebarDropdownProps {
 	item: DropdownItem[];
+	setSidebarOpen?: (arg: boolean) => void;
 }
 
-const SidebarDropdown = ({ item }: SidebarDropdownProps) => {
+const SidebarDropdown = ({ item, setSidebarOpen }: SidebarDropdownProps) => {
 	const pathname = usePathname();
 
 	return (
@@ -20,6 +21,7 @@ const SidebarDropdown = ({ item }: SidebarDropdownProps) => {
 				<li key={index}>
 					<Link
 						href={item.route}
+						onClick={() => setSidebarOpen && setSidebarOpen(false)}
 						className={`group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${pathname === item.route ? "text-white" : ""
 							}`}>
 						{item.label}

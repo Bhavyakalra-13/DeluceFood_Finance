@@ -37,6 +37,27 @@ interface FormData {
 	isGSTBill?: boolean;
 }
 
+interface Product {
+	id: string;
+	name: string;
+	price: number;
+	description?: string;
+	taxRate?: number;
+	stock?: number;
+	unit?: string;
+}
+
+interface Customer {
+	id: string;
+	name: string;
+	email: string;
+	phone: string;
+	address: string;
+	city: string;
+	state: string;
+	pincode: string;
+}
+
 const Form = () => {
 	const [formData, setFormData] = useState<FormData>({
 		// Product details
@@ -71,8 +92,8 @@ const Form = () => {
 		isGSTBill: false,
 	});
 
-	const [products, setProducts] = useState();
-	const [customers, setCustomers] = useState();
+	const [products, setProducts] = useState<Product[] | null>(null);
+	const [customers, setCustomers] = useState<Customer[] | null>(null);
 	const [showPreview, setShowPreview] = useState(false);
 
 	useEffect(() => {
@@ -80,31 +101,31 @@ const Form = () => {
 		fetchCustomers();
 	}, []);
 
-	const fetchProducts = async () => {
-		try {
-			const querySnapshot = await getDocs(collection(db, "products"));
-			const data = querySnapshot.docs.map((doc) => ({
-				id: doc.id,
-				...doc.data(),
-			}));
-			setProducts(data);
-		} catch (error) {
-			console.error("Error fetching products: ", error);
-		}
-	};
+const fetchProducts = async () => {
+	try {
+		const querySnapshot = await getDocs(collection(db, "products"));
+		const data = querySnapshot.docs.map((doc) => ({
+			id: doc.id,
+			...doc.data(),
+		})) as Product[];
+		setProducts(data);
+	} catch (error) {
+		console.error("Error fetching products: ", error);
+	}
+};
 
-	const fetchCustomers = async () => {
-		try {
-			const querySnapshot = await getDocs(collection(db, "customers"));
-			const data = querySnapshot.docs.map((doc) => ({
-				id: doc.id,
-				...doc.data(),
-			}));
-			setCustomers(data);
-		} catch (error) {
-			console.error("Error fetching customers: ", error);
-		}
-	};
+const fetchCustomers = async () => {
+	try {
+		const querySnapshot = await getDocs(collection(db, "customers"));
+		const data = querySnapshot.docs.map((doc) => ({
+			id: doc.id,
+			...doc.data(),
+		})) as Customer[];
+		setCustomers(data);
+	} catch (error) {
+		console.error("Error fetching customers: ", error);
+	}
+};
 
 	const handleChange = (
 		e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -236,7 +257,7 @@ const Form = () => {
 								name="buyerName"
 								value={formData.buyerName}
 								onChange={(e) => {
-									const selectedCustomer = customers.find(
+									const selectedCustomer = (customers || []).find(
 										(c) => c.name === e.target.value
 									);
 									setFormData({
@@ -258,7 +279,7 @@ const Form = () => {
 								className="mt-1 w-full p-2 border border-stroke rounded-md bg-white text-black dark:bg-form-input dark:border-form-strokedark dark:text-white"
 								required>
 								<option value="">Select a customer</option>
-								{customers.map((customer) => (
+								{(customers??[]).map((customer) => (
 									<option
 										key={customer.id}
 										value={customer.name}>
@@ -353,7 +374,7 @@ const Form = () => {
 								name="product"
 								value={formData.product}
 								onChange={(e) => {
-									const selectedProduct = products.find(
+									const selectedProduct = (products || []).find(
 										(p) => p.name === e.target.value
 									);
 									setFormData({
@@ -368,7 +389,7 @@ const Form = () => {
 								className="mt-1 w-full p-2 border border-stroke rounded-md bg-white text-black dark:bg-form-input dark:border-form-strokedark dark:text-white"
 								required>
 								<option value="">Select a product</option>
-								{products.map((product) => (
+								{(products??[]).map((product) => (
 									<option
 										key={product.id}
 										value={product.name}>
@@ -473,14 +494,14 @@ const Form = () => {
 							<div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
 								<label className="block text-body dark:text-bodydark">
 									Seller GSTIN:
-									<select
+									<input
+										type="text"
 										name="sellerGST"
-										value={formData.sellerGST || "hgggg"}
+										value={formData.sellerGST || ""}
 										onChange={handleChange}
 										className="mt-1 w-full p-2 border border-stroke rounded-md bg-white text-black dark:bg-form-input dark:border-form-strokedark dark:text-white"
-										required>
-										<option value="hgggg">hgggg</option>
-									</select>
+										placeholder="Enter seller GSTIN"
+									/>
 								</label>
 								<label className="block text-body dark:text-bodydark">
 									Customer GSTIN:
